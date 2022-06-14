@@ -1,20 +1,38 @@
-package com.discord;
+package com.discord.server.utils;
 
-import java.io.File;
+import java.awt.*;
 import java.util.ArrayList;
 
 public class User {
+
+    public enum Status{
+        ONLINE("Online"),
+        IDLE("Idle"),
+        DND("Do Not Disturb"),
+        INVISIBLE("Invisible");
+
+        private String name;
+
+        Status(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+    }
 
     private String userName;
     private String password;
     private String email;
     private String phoneNumber;
-    private File imageFile;
-    private String status;
+    private Image imageFile;
+    private Status status;
     private ArrayList<User> friends;
     private ArrayList<PrivateChat> privateChats;
     private ArrayList<User> blockUsers;
-    public User(String userName, String password, String email, String phoneNumber,File imageFile) {
+    public User(String userName, String password, String email, String phoneNumber,Image imageFile){
         this.userName = userName;
         this.password = password;
         this.email = email;
@@ -40,7 +58,7 @@ public class User {
         return phoneNumber;
     }
 
-    public File getImageFile() {
+    public Image getImageFile() {
         return imageFile;
     }
 
@@ -52,12 +70,35 @@ public class User {
         return friends;
     }
 
+    public void removeFriend(User user){
+        friends.remove(user);
+    }
+
     public ArrayList<PrivateChat> getPrivateChats(){
         return privateChats;
+    }
+
+    public void addPrivateChat (PrivateChat privateChat){
+        privateChats.add(privateChat);
+    }
+
+    public void removePrivateChat(PrivateChat privateChat){
+        privateChats.remove(privateChat);
     }
 
     public ArrayList<User> getBlockUsers(){
         return blockUsers;
     }
+
+    public void addBlockUser(User user){
+        blockUsers.add(user);
+    }
+
+    public void removeBlockUser(User user){
+        blockUsers.remove(user);
+    }
+
+
+
 
 }

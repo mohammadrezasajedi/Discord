@@ -32,6 +32,7 @@ public class User {
     private ArrayList<User> friends;
     private ArrayList<PrivateChat> privateChats;
     private ArrayList<User> blockUsers;
+    private ArrayList<String> discordServers;
     public User(String userName, String password, String email, String phoneNumber,Image imageFile){
         this.userName = userName;
         this.password = password;
@@ -40,6 +41,7 @@ public class User {
         this.imageFile=imageFile;
         friends=new ArrayList<>();
         privateChats=new ArrayList<>();
+        discordServers=new ArrayList<>();
     }
 
     public String getUserName() {

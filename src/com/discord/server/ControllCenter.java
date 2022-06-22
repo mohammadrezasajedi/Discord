@@ -2,6 +2,8 @@ package com.discord.server;
 
 import com.discord.server.utils.DiscordServer;
 import com.discord.server.utils.User;
+import com.discord.server.utils.exceptions.DuplicateException;
+import com.discord.server.utils.exceptions.WrongFormatException;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -10,6 +12,7 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.regex.Pattern;
 
 public class ControllCenter {
 
@@ -37,4 +40,42 @@ public class ControllCenter {
 
     }
 
+    public User createUser(String userName,String password,String email){
+        User user=new User(userName,password,email,null,null);
+        users.put(user.getUserName(),user);
+        return user;
+    }
+
+
+
+    public boolean checkUserName(String str) throws WrongFormatException, DuplicateException {
+        if (Pattern.matches("(\\S[a-zA-z0-9]{5,})",str)){
+            if (users.containsKey(str)){
+                throw new DuplicateException("Your user name is in use");
+            }
+            else {
+                return true;
+            }
+        } else {
+            throw new WrongFormatException("Your user name is not valid");
+        }
+    }
+
+    public boolean checkPassword(String str) throws WrongFormatException {
+        if (Pattern.matches("\\w{7,}",str)) {
+            return true;
+        }else {
+            throw new WrongFormatException("Your password is not valid");
+        }
+
+    }
+
+    public boolean checkEmail(String str) throws WrongFormatException {
+        if (Pattern.matches("(\\S.*\\S)(@)(\\S.*\\S)(.\\S[a-z]{2,3})",str)) {
+            return true;
+        }else {
+            throw new WrongFormatException("Your e-mail is not valid");
+        }
+
+    }
 }

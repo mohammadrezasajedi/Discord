@@ -49,6 +49,14 @@ public class Client {
                         respond=UI.getEmail(methodRead());
                         break;
                     }
+                    case INITMENU:{
+                        respond=UI.initMenu(methodRead());
+                        break;
+                    }
+                    case PRINT:{
+                        UI.print(methodRead());
+                        break;
+                    }
 
                 }
 
@@ -62,7 +70,8 @@ public class Client {
                 }
             }
         } catch (IOException e){
-            e.printStackTrace();
+            System.err.println("Server Unreachable!");
+            System.exit(-1);
         }
     }
 

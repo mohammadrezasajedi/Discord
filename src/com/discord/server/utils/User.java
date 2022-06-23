@@ -1,9 +1,10 @@
 package com.discord.server.utils;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class User {
+public class User implements Serializable {
 
     public enum Status{
         ONLINE("Online"),

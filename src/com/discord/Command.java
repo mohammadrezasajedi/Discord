@@ -1,6 +1,9 @@
 package com.discord;
 
 public enum Command{
+
+    INITMENU("initMenu"),
+    PRINT("print"),
     GETUSERNAME("getUserName"),
     GETUSERNAMEAGAIN("getUserNameAgain"),
     GETPASSWORD("getPassword"),

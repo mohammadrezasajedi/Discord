@@ -2,11 +2,12 @@ package com.discord.server.utils;
 
 import com.discord.server.utils.channels.Channel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-public class DiscordServer {
+public class DiscordServer implements Serializable {
 
     public enum Access{
         CHANELCREATOR,

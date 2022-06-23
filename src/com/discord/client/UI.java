@@ -46,6 +46,14 @@ public class UI {
         return sc.nextLine();
     }
 
+    public static String initMenu (String str) {
+        System.out.println(str);
+        Scanner sc = new Scanner(System.in);
+        return sc.nextLine();
+    }
 
+    public static void print(String str){
+        System.out.println(str);
+    }
 
 }

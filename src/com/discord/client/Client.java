@@ -56,6 +56,14 @@ public class Client {
                     case PRINT:{
                         UI.print(methodRead());
                         break;
+                    } case SHOWMENU:{
+                        respond=UI.ShowMenu(methodRead());
+                        break;
+                    }
+
+                    case EXIT:{
+                        UI.exit();
+                        System.exit(0);
                     }
 
                 }

@@ -9,7 +9,9 @@ public enum Command{
     GETPASSWORD("getPassword"),
     GETPASSWORDAGAIN("getPasswordAgain"),
     GETEMAIL("getEmail"),
-    GETEMAILAGAIN("getEmailAgain")
+    GETEMAILAGAIN("getEmailAgain"),
+    SHOWMENU("showMenu"),
+    EXIT("exit")
     ;
 
     private String str;

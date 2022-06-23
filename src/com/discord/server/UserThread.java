@@ -54,7 +54,27 @@ public class UserThread extends Thread{
             }else {
                 signUp();
             }
+            methodWrite(Command.PRINT.getStr());
+            methodWrite("Well Come " + user.getUserName());
 
+            choose=0;
+            methodWrite(Command.SHOWMENU.getStr());
+            methodWrite("1.Private chat  2.Discord servers  3.Profile");
+            loop=true;
+            while (loop){
+                try {
+                    choose=Integer.parseInt(methodRead());
+                    if (!(choose==1 || choose==2 || choose==3 )){
+
+                        throw new WrongFormatException(null);
+                    }
+                    loop=false;
+                }
+                catch (NumberFormatException | WrongFormatException e){
+                    methodWrite(Command.SHOWMENU.getStr());
+                    methodWrite("Your input is not valid");
+                }
+            }
 
 
         } catch (IOException e) {
@@ -128,11 +148,12 @@ public class UserThread extends Thread{
         user=controllCenter.createUser(userName,password,email);
     }
 
-    private void login(){
+    private void login() throws IOException {
         boolean loop=true;
         String userName;
         String password;
-        while (loop){
+        int count = 0;
+        while (loop && (count < 3)){
             try {
                 methodWrite(Command.GETUSERNAME.getStr());
                 userName=methodRead();
@@ -145,13 +166,16 @@ public class UserThread extends Thread{
                     methodWrite(Command.PRINT.getStr());
                     methodWrite("Your user name or password is not valid");
                     loop=true;
+                    count++;
                 }
             }catch (IOException e){
                 e.printStackTrace();
                 loop=false;
+                count++;
             }
-
-
+            if(count == 3) {
+                methodWrite(Command.EXIT.getStr());
+            }
         }
 
 

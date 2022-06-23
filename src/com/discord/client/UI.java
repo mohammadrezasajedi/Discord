@@ -56,4 +56,13 @@ public class UI {
         System.out.println(str);
     }
 
+    public static String ShowMenu (String str) {
+        System.out.println(str);
+        Scanner sc = new Scanner(System.in);
+        return sc.nextLine();
+    }
+    public static void exit (){
+        System.out.println("Exiting The Application");
+    }
+
 }

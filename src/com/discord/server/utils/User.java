@@ -3,6 +3,7 @@ package com.discord.server.utils;
 import java.awt.*;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class User implements Serializable {
 
@@ -10,7 +11,8 @@ public class User implements Serializable {
         ONLINE("Online"),
         IDLE("Idle"),
         DND("Do Not Disturb"),
-        INVISIBLE("Invisible");
+        INVISIBLE("Invisible"),
+        OFFLINE("offline");
 
         private String name;
 
@@ -30,8 +32,9 @@ public class User implements Serializable {
     private String phoneNumber;
     private Image imageFile;
     private Status status;
+    private ArrayList<User> requests;
     private ArrayList<User> friends;
-    private ArrayList<PrivateChat> privateChats;
+    private HashMap<String,PrivateChat> privateChats;
     private ArrayList<User> blockUsers;
     private ArrayList<String> discordServers;
     public User(String userName, String password, String email, String phoneNumber,Image imageFile){
@@ -40,9 +43,11 @@ public class User implements Serializable {
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.imageFile=imageFile;
+        requests = new ArrayList<>();
         friends=new ArrayList<>();
-        privateChats=new ArrayList<>();
+        privateChats=new HashMap<>();
         discordServers=new ArrayList<>();
+        status = Status.ONLINE;
     }
 
     public String getUserName() {
@@ -65,6 +70,23 @@ public class User implements Serializable {
         return imageFile;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public void addRequest(User request){
+        requests.add(request);
+    }
+
+    public ArrayList<User> getRequests(){
+        return requests;
+    }
+
+
     public void addFriend(User friend){
         friends.add(friend);
     }
@@ -77,16 +99,16 @@ public class User implements Serializable {
         friends.remove(user);
     }
 
-    public ArrayList<PrivateChat> getPrivateChats(){
+    public HashMap<String,PrivateChat> getPrivateChats(){
         return privateChats;
     }
 
-    public void addPrivateChat (PrivateChat privateChat){
-        privateChats.add(privateChat);
+    public void addPrivateChat (User user){
+        privateChats.put(user.getUserName(),new PrivateChat(this,user));
     }
 
-    public void removePrivateChat(PrivateChat privateChat){
-        privateChats.remove(privateChat);
+    public void removePrivateChat(User user){
+        privateChats.remove(user.getUserName());
     }
 
     public ArrayList<User> getBlockUsers(){

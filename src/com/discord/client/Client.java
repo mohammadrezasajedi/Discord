@@ -1,12 +1,16 @@
 package com.discord.client;
 
 import com.discord.Command;
+import com.discord.client.chat.ReadThread;
+import com.discord.client.chat.WriteThread;
 import com.discord.server.UserThread;
 
 import java.io.*;
 import java.net.Socket;
 import java.time.LocalDate;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Client {
 
@@ -49,21 +53,32 @@ public class Client {
                         respond=UI.getEmail(methodRead());
                         break;
                     }
-                    case INITMENU:{
-                        respond=UI.initMenu(methodRead());
-                        break;
-                    }
                     case PRINT:{
                         UI.print(methodRead());
                         break;
-                    } case SHOWMENU:{
-                        respond=UI.ShowMenu(methodRead());
+                    }
+                    case SHOWMENU:{
+                        int num=Integer.parseInt(methodRead());
+                        StringBuilder sb=new StringBuilder();
+                        for (int i = 0; i < num; i++) {
+                            sb.append(methodRead());
+                            sb.append("\n");
+                        }
+                        respond=UI.ShowMenu(sb.toString());
                         break;
                     }
-
+                    case CREATEFRIEND:{
+                        respond=UI.getCreateFriend();
+                        break;
+                    }
+                    case ENTERCHATMODE:{
+                        chatMode();
+                        break;
+                    }
                     case EXIT:{
                         UI.exit();
                         System.exit(0);
+                        break;
                     }
 
                 }
@@ -83,6 +98,20 @@ public class Client {
         }
     }
 
+    private static void chatMode(){
+        ExecutorService pool= Executors.newCachedThreadPool();
+        pool.execute(new ReadThread(reader,pool));
+        pool.execute(new WriteThread(writer));
+
+        while (!pool.isShutdown()){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
     private static String methodRead () throws IOException {
         String str = reader.readLine();
         while (str.equals("")){
@@ -91,6 +120,11 @@ public class Client {
         return str;
     }
 
+    private static void methodWrite (String str) throws IOException {
+        writer.write(str);
+        writer.newLine();
+        writer.flush();
+    }
 
 
 

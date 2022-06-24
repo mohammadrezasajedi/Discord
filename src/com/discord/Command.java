@@ -1,8 +1,9 @@
 package com.discord;
 
 public enum Command{
-
-    INITMENU("initMenu"),
+    ENTERCHATMODE("enterChatMode"),
+    EXITCHATMODE("#exitChatMode"),
+    CREATEFRIEND("createFriend"),
     PRINT("print"),
     GETUSERNAME("getUserName"),
     GETUSERNAMEAGAIN("getUserNameAgain"),

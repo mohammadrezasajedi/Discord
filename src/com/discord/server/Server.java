@@ -12,9 +12,16 @@ public class Server {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         File file=new File("CotrollCenterFile.bin");
         if (file.exists()){
-            ObjectInputStream read = new ObjectInputStream(new FileInputStream(file));
-            controllCenter=new ControllCenter((ControllCenter) read.readObject());
-            read.close();
+            ObjectInputStream read= null;
+            try {
+                 read = new ObjectInputStream(new FileInputStream(file));
+                controllCenter = new ControllCenter((ControllCenter) read.readObject());
+            } catch (InvalidClassException | EOFException e){
+                controllCenter=new ControllCenter();
+            }
+            if (read != null) {
+                read.close();
+            }
         }else {
             controllCenter=new ControllCenter();
         }

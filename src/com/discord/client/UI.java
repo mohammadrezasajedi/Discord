@@ -46,12 +46,6 @@ public class UI {
         return sc.nextLine();
     }
 
-    public static String initMenu (String str) {
-        System.out.println(str);
-        Scanner sc = new Scanner(System.in);
-        return sc.nextLine();
-    }
-
     public static void print(String str){
         System.out.println(str);
     }
@@ -63,6 +57,12 @@ public class UI {
     }
     public static void exit (){
         System.out.println("Exiting The Application");
+    }
+
+    public static String getCreateFriend(){
+        System.out.println("Please enter desired user name");
+        Scanner sc=new Scanner(System.in);
+        return sc.nextLine();
     }
 
 }

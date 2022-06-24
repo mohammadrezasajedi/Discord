@@ -64,6 +64,13 @@ public class ControllCenter implements Serializable {
         }
         return null;
     }
+    public User findUser(String userName){
+        User user=users.get(userName);
+        if (user!=null){
+            return user;
+        }
+        return null;
+    }
 
     public boolean checkUserName(String str) throws WrongFormatException, DuplicateException {
         if (Pattern.matches("(\\S[a-zA-z0-9]{5,})",str)){

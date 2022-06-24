@@ -1,6 +1,13 @@
 package com.discord.server.utils;
 
+import com.discord.server.utils.chat.PrivateChatThread;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class PrivateChat {
     private User user1;
@@ -22,6 +29,13 @@ public class PrivateChat {
 
     public User getUser2() {
         return user2;
+    }
+
+    public void startChat (BufferedWriter writer, BufferedReader reader,User user){
+        PrivateChatThread t = new PrivateChatThread(reader,writer,user,massages);
+        Thread thread= new Thread(() -> t.runWrite());
+        t.runRead();
+        thread.interrupt();
     }
 
 }

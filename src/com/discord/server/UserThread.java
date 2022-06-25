@@ -1,16 +1,15 @@
 package com.discord.server;
 
 import com.discord.Command;
+import com.discord.server.utils.discordServer.DiscordServer;
 import com.discord.server.utils.PrivateChat;
 import com.discord.server.utils.User;
 import com.discord.server.utils.exceptions.DuplicateException;
 import com.discord.server.utils.exceptions.WrongFormatException;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.InputMismatchException;
 
 public class UserThread extends Thread{
 
@@ -32,50 +31,57 @@ public class UserThread extends Thread{
     @Override
     public void run() {
         try {
-            System.out.println("Wellcome Sent");
-            methodWrite("Welcome to discord.\n");
+            boolean app = true;
+            while (app) {
+                System.out.println("Wellcome Sent");
+                methodWrite("Welcome to discord.\n");
 
-            int choose = showMenu("1.Login\n2.Signup",2);
-            if (choose==1){
-                login();
-            }else {
-                signUp();
-            }
+                int choose = showMenu("1.Login\n2.Signup\n3.exit", 3);
+                if (choose == 1) {
+                    login();
+                } else if (choose == 2){
+                    signUp();
+                } else {
+                    app = false;
+                    exit();
+                    break;
+                }
 
-            if (user.getStatus()== User.Status.OFFLINE){
-                user.setStatus(User.Status.ONLINE);
-            }
+                if (user.getStatus() == User.Status.OFFLINE) {
+                    user.setStatus(User.Status.ONLINE);
+                }
 
-            methodWrite(Command.PRINT.getStr());
-            methodWrite("Well Come " + user.getUserName());
+                methodWrite(Command.PRINT.getStr());
+                methodWrite("Well Come " + user.getUserName());
 
 
-            boolean loop=true;
+                boolean loop = true;
 
-            while (loop) {
-                choose= showMenu("1.Friends\n2.Private chat\n3.Discord servers\n4.Profile\n5.exit",5);
+                while (loop) {
+                    choose = showMenu("1.Friends\n2.Private chat\n3.Discord servers\n4.Profile\n5.logout", 5);
 
-                switch (choose) {
-                    case 1:{
-                        fMenu();
-                        break;
-                    }
-                    case 2: {
-                        pChatMenu();
-                        break;
-                    }
-                    case 3: {
-                        server();
-                        break;
-                    }
-                    case 4: {
-                        profile();
-                        break;
-                    }
-                    case 5: {
-                        loop=false;
-                        exit();
-                        break;
+                    switch (choose) {
+                        case 1: {
+                            fMenu();
+                            break;
+                        }
+                        case 2: {
+                            pChatMenu();
+                            break;
+                        }
+                        case 3: {
+                            serverMenu();
+                            break;
+                        }
+                        case 4: {
+                            profile();
+                            break;
+                        }
+                        case 5: {
+                            logOut();
+                            loop = false;
+                            break;
+                        }
                     }
                 }
             }
@@ -86,8 +92,6 @@ public class UserThread extends Thread{
                 user.setStatus(User.Status.OFFLINE);
             }
         }
-
-
     }
 
     private void fMenu() throws IOException {
@@ -328,17 +332,78 @@ public class UserThread extends Thread{
     private void pChat(PrivateChat pc) throws IOException {
         pc.startChat(writer,reader,user);
     }
-    private void server(){
 
+    private void serverMenu() throws IOException {
+        boolean loop = true;
+        ArrayList<DiscordServer> se =user.getDiscordServers();
+
+        while (loop) {
+            int num = 2 + se.size();
+            StringBuilder sb = new StringBuilder("1.exit\n2.create new chat\n");
+            int i = 3;
+            for (DiscordServer s : se) {
+                sb.append(i++);
+                sb.append('.');
+                sb.append(s.getServerName());
+                sb.append("\n");
+            }
+
+            int choose=showMenu(sb.toString(),num);
+            switch (choose){
+                case 1:{
+                    loop=false;
+                    break;
+                }
+                case 2:{
+                    creatNewServer();
+                    break;
+                }
+                default:{
+                    server(se.get(choose-3));
+                    break;
+                }
+            }
+        }
     }
+
+    private void creatNewServer() throws IOException {
+        boolean loop=true;
+        methodWrite(Command.GETSERVERNAME.getStr());
+        String serverName = null;
+        while (loop) {
+            try {
+                serverName = methodRead();
+                if (controllCenter.checkServerName(serverName)){
+                    loop=false;
+                }
+            }catch (DuplicateException e){
+                loop = true;
+                methodWrite(Command.GETSERVERNAMEAGAIN.getStr());
+                methodWrite(e.toString());
+            }
+        }
+
+        DiscordServer server= controllCenter.createServer(serverName,this.user);
+        server(server);
+    }
+
+    private void server(DiscordServer server){
+        server.enterMember(user,writer,reader);
+    }
+
     private void profile(){
 
     }
-    private void exit() throws IOException {
+    private void logOut () {
         if (user.getStatus()== User.Status.ONLINE){
             user.setStatus(User.Status.OFFLINE);
         }
+        System.out.println(user.getUserName() + " Logged Out.");
+    }
+
+    private void exit() throws IOException {
         methodWrite(Command.EXIT.getStr());
+        System.out.println("a Client Left.");
         Thread.currentThread().interrupt();
     }
 

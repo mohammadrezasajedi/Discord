@@ -79,6 +79,14 @@ public class Client {
                         chatMode();
                         break;
                     }
+                    case GETSERVERNAME:{
+                        respond=UI.getServerName();
+                        break;
+                    }
+                    case GETSERVERNAMEAGAIN:{
+                        respond=UI.getServerName(methodRead());
+                        break;
+                    }
                     case EXIT:{
                         UI.exit();
                         System.exit(0);

@@ -64,5 +64,16 @@ public class UI {
         Scanner sc=new Scanner(System.in);
         return sc.nextLine();
     }
+    public static String getServerName(){
+        System.out.println("Please enter your server name");
+        Scanner sc=new Scanner(System.in);
+        return sc.nextLine();
+    }
+    public static String getServerName(String str){
+        System.out.println(str);
+        System.out.println("Please enter your server name again");
+        Scanner sc=new Scanner(System.in);
+        return sc.nextLine();
+    }
 
 }

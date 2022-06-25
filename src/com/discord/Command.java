@@ -1,6 +1,8 @@
 package com.discord;
 
 public enum Command{
+    GETSERVERNAMEAGAIN("getServerNameAgain"),
+    GETSERVERNAME("getServerName"),
     ENTERCHATMODE("enterChatMode"),
     EXITCHATMODE("#exitChatMode"),
     CREATEFRIEND("createFriend"),

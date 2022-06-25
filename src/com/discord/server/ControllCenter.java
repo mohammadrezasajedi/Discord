@@ -1,6 +1,6 @@
 package com.discord.server;
 
-import com.discord.server.utils.DiscordServer;
+import com.discord.server.utils.discordServer.DiscordServer;
 import com.discord.server.utils.User;
 import com.discord.server.utils.exceptions.DuplicateException;
 import com.discord.server.utils.exceptions.WrongFormatException;
@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Pattern;
 
 public class ControllCenter implements Serializable {
@@ -102,4 +101,27 @@ public class ControllCenter implements Serializable {
         }
 
     }
+
+    public boolean checkServerName(String name) throws DuplicateException {
+        if (discordServers.containsKey(name)){
+            throw new DuplicateException("Your server name is in use");
+        }
+        else {
+            return true;
+        }
+    }
+
+    public DiscordServer createServer(String serverName,User owner){
+        DiscordServer discordServer=new DiscordServer(serverName,owner,this);
+        discordServers.put(discordServer.getServerName(),discordServer);
+        owner.getDiscordServers().add(discordServer);
+        return discordServer;
+    }
+
+    public void changeServerName(String oldName,String newName,DiscordServer server){
+        discordServers.remove(oldName);
+        discordServers.put(newName,server);
+    }
+
+
 }

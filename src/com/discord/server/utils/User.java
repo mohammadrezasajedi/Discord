@@ -1,6 +1,6 @@
 package com.discord.server.utils;
 
-import com.discord.server.utils.chat.PrivateChatWriter;
+import com.discord.server.utils.discordServer.DiscordServer;
 
 import java.awt.*;
 import java.io.Serializable;
@@ -38,7 +38,7 @@ public class User implements Serializable {
     private ArrayList<User> friends;
     private HashMap<String,PrivateChat> privateChats;
     private ArrayList<User> blockUsers;
-    private ArrayList<String> discordServers;
+    private ArrayList<DiscordServer> discordServers;
     public User(String userName, String password, String email, String phoneNumber,Image imageFile){
         this.userName = userName;
         this.password = password;
@@ -125,7 +125,7 @@ public class User implements Serializable {
         blockUsers.remove(user);
     }
 
-
-
-
+    public ArrayList<DiscordServer> getDiscordServers() {
+        return discordServers;
+    }
 }

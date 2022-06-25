@@ -28,6 +28,10 @@ public class Client {
             while (!end) {
                 Command command=Command.valueOfLabel(methodRead());
                 String respond = null;
+                if (command == null){
+                    continue;
+                }
+
                 switch (command){
                     case GETUSERNAME:{
                         respond = UI.getUserName();
@@ -99,16 +103,15 @@ public class Client {
     }
 
     private static void chatMode(){
-        ExecutorService pool= Executors.newCachedThreadPool();
-        pool.execute(new ReadThread(reader,pool));
-        pool.execute(new WriteThread(writer));
+        WriteThread writeThread = new WriteThread(writer);
+        Thread thread = new Thread(writeThread);
+        thread.start();
 
-        while (!pool.isShutdown()){
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e){
-                e.printStackTrace();
-            }
+        ReadThread readThread = new ReadThread(reader);
+        readThread.run();
+
+        if (thread.isAlive()){
+            thread.interrupt();
         }
     }
 

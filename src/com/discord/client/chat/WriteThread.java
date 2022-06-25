@@ -18,15 +18,23 @@ public class WriteThread implements Runnable{
     @Override
     public void run() {
         Scanner scanner = new Scanner(System.in);
-        while (true){
-            String str = scanner.nextLine();
+        String str = scanner.nextLine();
+        while (!str.equals("#exit")){
             try {
                 writer.write(str);
                 writer.newLine();
                 writer.flush();
+                str = scanner.nextLine();
             } catch (IOException e) {
                 Thread.currentThread().interrupt();
             }
+        }
+        try {
+            writer.write(str);
+            writer.newLine();
+            writer.flush();
+        } catch (IOException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }

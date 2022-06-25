@@ -1,5 +1,7 @@
 package com.discord.server.utils;
 
+import com.discord.server.utils.chat.PrivateChatWriter;
+
 import java.awt.*;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -103,8 +105,8 @@ public class User implements Serializable {
         return privateChats;
     }
 
-    public void addPrivateChat (User user){
-        privateChats.put(user.getUserName(),new PrivateChat(this,user));
+    public void addPrivateChat (User user, PrivateChat privateChat){
+        privateChats.put(user.getUserName(),privateChat);
     }
 
     public void removePrivateChat(User user){

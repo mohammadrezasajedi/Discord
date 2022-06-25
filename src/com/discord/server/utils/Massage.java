@@ -1,5 +1,6 @@
 package com.discord.server.utils;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalField;
@@ -7,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 
-public class Massage {
+public class Massage implements Serializable {
 
     public enum reaction{
         LIKE,
@@ -18,15 +19,15 @@ public class Massage {
     private String text;
     private User author;
     private LocalDate date;
-    private Long id;
+    private long id;
     private ArrayList<User> likes;
     private ArrayList<User> dislikes;
     private ArrayList<User> laughters;
-    public Massage(String text, User author) {
+    public Massage(String text, User author,long id) {
         this.text = text;
         this.author = author;
         this.date = LocalDate.now();
-        this.id= LocalDate.now().getLong(ChronoField.ALIGNED_DAY_OF_WEEK_IN_MONTH);
+        this.id= id;
         likes=new ArrayList<>();
         dislikes=new ArrayList<>();
         laughters=new ArrayList<>();
@@ -59,4 +60,16 @@ public class Massage {
         laughters.add(user);
     }
 
+    @Override
+    public String toString() {
+        return "Massage{" +
+                "text='" + text + '\'' +
+                ", author=" + author +
+                ", date=" + date +
+                ", id=" + id +
+                ", likes=" + likes +
+                ", dislikes=" + dislikes +
+                ", laughters=" + laughters +
+                '}';
+    }
 }

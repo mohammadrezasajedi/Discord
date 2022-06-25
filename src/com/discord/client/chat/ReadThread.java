@@ -9,22 +9,19 @@ import java.util.concurrent.Executors;
 
 public class ReadThread implements Runnable{
     private BufferedReader reader;
-    private ExecutorService pool;
 
-    public ReadThread(BufferedReader reader, ExecutorService pool) {
+    public ReadThread(BufferedReader reader) {
         this.reader = reader;
-        this.pool = pool;
     }
 
     @Override
     public void run() {
         try {
             String str = methodRead();
-            while (!str.equals(Command.ENTERCHATMODE.getStr())){
+            while (!str.equals(Command.EXITCHATMODE.getStr())){
                 System.out.println(str);
                 str = methodRead();
             }
-            pool.shutdown();
         } catch (IOException e) {
             Thread.currentThread().interrupt();
         }

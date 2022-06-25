@@ -273,7 +273,7 @@ public class UserThread extends Thread{
 
         while (loop) {
             int num = 2 + pc.size();
-            StringBuilder sb = new StringBuilder("1.exit\n2.create new chat");
+            StringBuilder sb = new StringBuilder("1.exit\n2.create new chat\n");
             int i = 3;
             for (String p : pc) {
                 sb.append(i++);
@@ -290,9 +290,11 @@ public class UserThread extends Thread{
                     break;
                 } case (2) : {
                     createNewChat();
+                    break;
                 }
                 default:{
                     pChat(user.getPrivateChats().get(pc.get(choose - 3)));
+                    break;
                 }
             }
         }
@@ -314,8 +316,9 @@ public class UserThread extends Thread{
                 loop = false;
             } else {
                 if (!user.getPrivateChats().containsKey(user.getFriends().get(choose - 2).getUserName())){
-                    user.addPrivateChat(user.getFriends().get(choose - 2));
-                    user.getFriends().get(choose - 2).addPrivateChat(user);
+                    PrivateChat privateChat = new PrivateChat(user,user.getFriends().get(choose - 2));
+                    user.addPrivateChat(user.getFriends().get(choose - 2),privateChat);
+                    user.getFriends().get(choose - 2).addPrivateChat(user,privateChat);
                 }
                 pChat(user.getPrivateChats().get(user.getFriends().get(choose - 2).getUserName()));
             }
@@ -323,9 +326,7 @@ public class UserThread extends Thread{
     }
 
     private void pChat(PrivateChat pc) throws IOException {
-        methodWrite(Command.ENTERCHATMODE.getStr());
         pc.startChat(writer,reader,user);
-        methodWrite(Command.EXITCHATMODE.getStr());
     }
     private void server(){
 

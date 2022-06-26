@@ -123,5 +123,9 @@ public class ControllCenter implements Serializable {
         discordServers.put(newName,server);
     }
 
+    public void removeServer (DiscordServer discordServer){
+        discordServers.remove(discordServer.getServerName());
+    }
+
 
 }

@@ -95,11 +95,20 @@ public class Client {
                         respond=UI.getRoleName(methodRead());
                         break;
                     }
+                    case GETCHANNELNAME:{
+                        respond=UI.getChannelName();
+                        break;
+                    }
+                    case GETCHANNELNAMEAGAIN:{
+                        respond=UI.getChannelName(methodRead());
+                        break;
+                    }
                     case EXIT:{
                         UI.exit();
                         System.exit(0);
                         break;
                     }
+
 
                 }
 

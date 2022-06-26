@@ -1,6 +1,8 @@
 package com.discord;
 
 public enum Command{
+    GETCHANNELNAME("getChannelName"),
+    GETCHANNELNAMEAGAIN("getChannelNameAgain"),
     GETROLENAME("getRoleName"),
     GETROLENAMEAGAIN("getRoleNameAgain"),
     GETSERVERNAMEAGAIN("getServerNameAgain"),

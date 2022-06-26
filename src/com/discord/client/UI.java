@@ -86,5 +86,17 @@ public class UI {
         Scanner sc=new Scanner(System.in);
         return sc.nextLine();
     }
+    public static String getChannelName(){
+        System.out.println("Please enter your Channel name");
+        Scanner sc=new Scanner(System.in);
+        return sc.nextLine();
+    }
+    public static String getChannelName(String str){
+        System.out.println(str);
+        System.out.println("Please enter your Channel name again");
+        Scanner sc=new Scanner(System.in);
+        return sc.nextLine();
+    }
+
 
 }

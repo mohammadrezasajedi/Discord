@@ -13,6 +13,7 @@ import java.util.*;
 public class DiscordServer implements Serializable {
 
     public enum Access{
+        ROLEASSIGNER("Assign a Role"),
         CHANELCREATOR("Create a Channel"),
         CHANELREMOVER("Remove a Channel"),
         USERREMOVER("Remove a User"),
@@ -38,8 +39,8 @@ public class DiscordServer implements Serializable {
     private String serverName;
     private User serverOwner;
     private HashMap<User,Member> members;
-    private HashMap<String,Set<Access>> userAccesses;
-    private HashMap<User,String> userRoles;
+    private HashMap<String,Set<Access>> roleAccesses;
+    private HashMap<User,HashSet<String>> userRoles;
     private HashMap<String, Channel> channels;
     private ControllCenter controllCenter;
 
@@ -52,15 +53,16 @@ public class DiscordServer implements Serializable {
         HashSet<Access> ownerAccess = new HashSet<>();
         ownerAccess.addAll(Arrays.asList(Access.values()));
 
-        member.getRoles().addAll(Arrays.asList(Access.values()));
+        member.getRoles().add("Owner");
 
         members.put(serverOwner,member);
-        userAccesses=new HashMap<>();
         userRoles=new HashMap<>();
+        roleAccesses = new HashMap<>();
         channels=new HashMap<>();
 
-        userAccesses.put("Owner",ownerAccess);
-        userRoles.put(serverOwner,"Owner");
+        roleAccesses.put("Owner",ownerAccess);
+        userRoles.put(serverOwner,new HashSet<>());
+        userRoles.get(serverOwner).add("Owner");
     }
 
     public String getServerName() {
@@ -84,5 +86,27 @@ public class DiscordServer implements Serializable {
         }
     }
 
+    public Set<Access> getARoleAccesses (String str) {
+        return roleAccesses.get(str);
+    }
 
+    public boolean checkRoleName (String s) {
+        return !roleAccesses.containsKey(s);
+    }
+
+    public void addRole (String roleName,HashSet<Access> accesses){
+        roleAccesses.put(roleName,accesses);
+    }
+
+    public HashMap<User, Member> getMembers() {
+        return members;
+    }
+
+    public HashMap<String, Set<Access>> getRoleAccesses() {
+        return roleAccesses;
+    }
+
+    public HashMap<User, HashSet<String>> getUserRoles() {
+        return userRoles;
+    }
 }

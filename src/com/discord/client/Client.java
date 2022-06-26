@@ -87,6 +87,14 @@ public class Client {
                         respond=UI.getServerName(methodRead());
                         break;
                     }
+                    case GETROLENAME:{
+                        respond=UI.getRoleName();
+                        break;
+                    }
+                    case GETROLENAMEAGAIN:{
+                        respond=UI.getRoleName(methodRead());
+                        break;
+                    }
                     case EXIT:{
                         UI.exit();
                         System.exit(0);

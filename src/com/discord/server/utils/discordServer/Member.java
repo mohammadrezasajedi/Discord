@@ -10,15 +10,13 @@ import javax.management.relation.Role;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 public class Member {
     private User user;
     private DiscordServer discordServer;
     private ArrayList<Channel> channels;
-    private HashSet<DiscordServer.Access> roles;
+    private HashSet<String> roles;
     private BufferedWriter writer;
     private BufferedReader reader;
     public Member(User user,DiscordServer discordServer) {
@@ -32,7 +30,7 @@ public class Member {
         return channels;
     }
 
-    public HashSet<DiscordServer.Access> getRoles() {
+    public HashSet<String> getRoles() {
         return roles;
     }
 
@@ -81,7 +79,12 @@ public class Member {
     private void setting() throws IOException {
         boolean loop=true;
         while (loop){
-            ArrayList<DiscordServer.Access> accesses = new ArrayList<>(roles);
+            HashSet<DiscordServer.Access> acset = new HashSet<>();
+            for (String str : roles){
+                Set<DiscordServer.Access> access = discordServer.getARoleAccesses(str);
+                acset.addAll(access);
+            }
+            ArrayList<DiscordServer.Access> accesses = new ArrayList<>(acset);
             accesses.removeIf(w -> w.equals(DiscordServer.Access.MASSAGEPINNER));
             StringBuilder sb=new StringBuilder("1.exit\n");
             int i=2;
@@ -98,6 +101,10 @@ public class Member {
                 }
                 case ROLECREATOR:{
                     roleCreator();
+                    break;
+                }
+                case ROLEASSIGNER:{
+                    roleAssigner();
                     break;
                 }
                 case USERBLOCKER:{
@@ -150,7 +157,102 @@ public class Member {
             }
         }
     }
-    private void roleCreator(){
+    private void roleCreator() throws IOException {
+        boolean loop=true;
+        methodWrite(Command.GETROLENAME.getStr());
+        String roleName=null;
+        while (loop){
+            try {
+                roleName = methodRead();
+                if (!discordServer.checkRoleName(roleName)) {
+                    throw new DuplicateException("This role name already exists");
+                }
+                loop = false;
+            } catch (DuplicateException e){
+                loop = true;
+                methodWrite(Command.GETUSERNAMEAGAIN.getStr());
+                methodWrite(e.toString());
+            }
+        }
+
+        loop = true;
+        ArrayList<DiscordServer.Access> accesses = new ArrayList<>(List.of(DiscordServer.Access.values()));
+        accesses.removeIf(w -> (w.equals(DiscordServer.Access.ROLECREATOR) || w.equals(DiscordServer.Access.SERVERREMOVER) || w.equals(DiscordServer.Access.ROLEASSIGNER)));
+        StringBuilder sb = new StringBuilder("1.confirm\n");
+        HashSet<DiscordServer.Access> roleAccesses = new HashSet<>();
+        while (loop) {
+            int num = 1 + accesses.size();
+            int i = 2;
+            for (DiscordServer.Access a : accesses) {
+                sb.append(i++).append(".").append(a.getMenu()).append("\n");
+            }
+            int choose = showMenu(sb.toString(), num);
+
+            switch (choose) {
+                case (1) : {
+                    loop = false;
+                    break;
+                }
+                default:{
+                    roleAccesses.add(accesses.get( choose - 2));
+                    break;
+                }
+            }
+        }
+        discordServer.addRole(roleName,roleAccesses);
+    }
+    private void roleAssigner() throws IOException {
+        boolean loop =true;
+        boolean exit=true;
+        Member member = null;
+        ArrayList<Member> members = new ArrayList<>(discordServer.getMembers().values());
+        while (loop){
+            StringBuilder sb= new StringBuilder("1.exit\n");
+            int num=1+members.size();
+            int i = 2;
+            for (Member m : members){
+                sb.append(i++).append(".").append(m.getUserName()).append("\n");
+            }
+
+            int choose = showMenu(sb.toString(),num);
+
+            switch (choose) {
+                case 1 :{
+                    loop = false;
+                    exit = false;
+                    break;
+                }
+                default:{
+                    member = members.get(choose - 2);
+                    break;
+                }
+            }
+
+            while (exit){
+                sb = new StringBuilder("1.exit\n");
+                i = 2;
+                ArrayList<String> roles = new ArrayList<>(discordServer.getRoleAccesses().keySet());
+                for (String role : roles){
+                    sb.append(i++).append(".").append(role).append("\n");
+                }
+
+                choose = showMenu(sb.toString(),num);
+                String role = null;
+
+                switch (choose){
+                    case 1:{
+                        exit = false;
+                        break;
+                    }
+                    default:{
+                        role = roles.get(choose - 2);
+                        member.getRoles().add(role);
+                        discordServer.getUserRoles().get(user).add(role);
+                    }
+                }
+            }
+        }
+
 
     }
     private void userBlocker(){
@@ -180,6 +282,8 @@ public class Member {
     private void channel(Channel channel){
 
     }
+
+
 
 
 
@@ -225,6 +329,10 @@ public class Member {
         writer.write(str);
         writer.newLine();
         writer.flush();
+    }
+
+    private String getUserName(){
+        return user.getUserName();
     }
 
 }

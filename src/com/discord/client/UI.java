@@ -75,5 +75,16 @@ public class UI {
         Scanner sc=new Scanner(System.in);
         return sc.nextLine();
     }
+    public static String getRoleName(){
+        System.out.println("Please enter your Role name");
+        Scanner sc=new Scanner(System.in);
+        return sc.nextLine();
+    }
+    public static String getRoleName(String str){
+        System.out.println(str);
+        System.out.println("Please enter your Role name again");
+        Scanner sc=new Scanner(System.in);
+        return sc.nextLine();
+    }
 
 }

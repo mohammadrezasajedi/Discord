@@ -18,21 +18,15 @@ import java.util.*;
 public class Member implements Serializable {
     private User user;
     private DiscordServer discordServer;
-    private ArrayList<Channel> channels;
     private HashSet<String> roles;
-    private BufferedWriter writer;
-    private BufferedReader reader;
+    private transient BufferedWriter writer;
+    private transient BufferedReader reader;
     private boolean block;
     public Member(User user,DiscordServer discordServer) {
         this.user = user;
         this.discordServer=discordServer;
-        channels=new ArrayList<>();
         roles=new HashSet<>();
          block=false;
-    }
-
-    public ArrayList<Channel> getChannels() {
-        return channels;
     }
 
     public HashSet<String> getRoles() {
@@ -51,6 +45,7 @@ public class Member implements Serializable {
         boolean loop=true;
         while (loop){
             try {
+                ArrayList<Channel> channels = new ArrayList<>(discordServer.getChannels(this).values());
                 StringBuilder sb=new StringBuilder("1.exit\n2.Settings\n");
                 int num=2+channels.size();
                 int i=3;
@@ -323,7 +318,7 @@ public class Member implements Serializable {
                 switch (choose){
                     case 1:{
                         member.setBlock(true);
-                        HashSet<Channel> channels = getInputChannels();
+                        HashMap<String,Channel> channels = getInputChannels();
                         discordServer.getBlockedMembers().put(member,channels);
                         exit = false;
                         break;
@@ -338,6 +333,7 @@ public class Member implements Serializable {
             }
         }
     }
+
     private void userLimiter() throws IOException {
 
     }
@@ -391,6 +387,7 @@ public class Member implements Serializable {
             }
         }
     }
+
     private void chanelCreator() throws IOException {
         boolean loop = true;
         String name = null;
@@ -441,16 +438,14 @@ public class Member implements Serializable {
 
 
     private void channel(Channel channel){
-
-
-
+        channel.start(this);
     }
 
 
     public Channel getInputChannel () throws IOException {
         boolean loop = true;
         Channel channel = null;
-        ArrayList<Channel> channels = new ArrayList<>(discordServer.getChannels().values());
+        ArrayList<Channel> channels = new ArrayList<>(discordServer.getChannels(null).values());
         while (loop) {
             StringBuilder sb = new StringBuilder("1.exit\n");
             int num = 1 + channels.size();
@@ -477,10 +472,10 @@ public class Member implements Serializable {
         return channel;
     }
 
-    public HashSet<Channel> getInputChannels () throws IOException {
+    public HashMap<String,Channel> getInputChannels () throws IOException {
         boolean loop = true;
-        HashSet<Channel> rChannels = new HashSet<>();
-        ArrayList<Channel> channels = new ArrayList<>(discordServer.getChannels().values());
+        HashMap<String,Channel> rChannels = new HashMap<>();
+        ArrayList<Channel> channels = new ArrayList<>(discordServer.getChannels(null).values());
         while (loop) {
             StringBuilder sb = new StringBuilder("1.confirm\n");
             int num = 1 + channels.size();
@@ -497,7 +492,7 @@ public class Member implements Serializable {
                     break;
                 }
                 default: {
-                    rChannels.add(channels.get(choose - 2));
+                    rChannels.put(channels.get(choose - 2).getName(),channels.get(choose - 2));
                     break;
                 }
             }
@@ -584,7 +579,19 @@ public class Member implements Serializable {
         this.block = block;
     }
 
+    public boolean isBlock() {
+        return block;
+    }
+
     public User getUser () {
         return user;
+    }
+
+    public BufferedWriter getWriter() {
+        return writer;
+    }
+
+    public BufferedReader getReader() {
+        return reader;
     }
 }

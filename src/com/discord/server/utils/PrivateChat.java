@@ -1,9 +1,8 @@
 package com.discord.server.utils;
 
 import com.discord.Command;
-import com.discord.client.chat.WriteThread;
-import com.discord.server.utils.chat.PrivateChatReader;
-import com.discord.server.utils.chat.PrivateChatWriter;
+import com.discord.server.utils.chat.privateChat.PrivateChatReader;
+import com.discord.server.utils.chat.privateChat.PrivateChatWriter;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,8 +10,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Observable;
 
 public class PrivateChat implements Serializable {
     private User user1;

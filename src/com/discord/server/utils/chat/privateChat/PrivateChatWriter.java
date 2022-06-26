@@ -1,4 +1,4 @@
-package com.discord.server.utils.chat;
+package com.discord.server.utils.chat.privateChat;
 
 import com.discord.Command;
 import com.discord.server.utils.Massage;

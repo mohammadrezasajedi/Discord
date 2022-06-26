@@ -45,7 +45,7 @@ public class DiscordServer implements Serializable {
     private HashMap<User,HashSet<String>> userRoles;
     private HashMap<String, Channel> channels;
     private ControllCenter controllCenter;
-    private HashMap<Member,HashSet<Channel>> blockedMembers;
+    private HashMap<Member,HashMap<String,Channel>> blockedMembers;
     public DiscordServer(String serverName, User serverOwner,ControllCenter controllCenter) {
         this.serverName = serverName;
         this.serverOwner = serverOwner;
@@ -120,12 +120,20 @@ public class DiscordServer implements Serializable {
         return userRoles;
     }
 
-    public HashMap<Member,HashSet<Channel>> getBlockedMembers() {
+    public HashMap<Member,HashMap<String,Channel>> getBlockedMembers() {
         return blockedMembers;
     }
 
-    public HashMap<String, Channel> getChannels() {
-        return channels;
+    public HashMap<String,Channel> getChannels(Member member) {
+        if (member != null) {
+            if (member.isBlock()) {
+                return blockedMembers.get(member);
+            } else {
+                return channels;
+            }
+        } else {
+            return channels;
+        }
     }
 
     public void addChannel(Channel channel){
@@ -133,9 +141,6 @@ public class DiscordServer implements Serializable {
     }
 
     public void removeChannel(String name){
-        for (Member m : channels.get(name).getMembers()) {
-            m.getChannels().remove(channels.get(name));
-        }
         channels.remove(name);
     }
 

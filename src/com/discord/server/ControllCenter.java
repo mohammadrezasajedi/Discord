@@ -52,6 +52,13 @@ public class ControllCenter implements Serializable {
         return user;
     }
 
+    public void changeUserName(String oldName,String newName){
+        User user = users.get(oldName);
+        users.remove(oldName);
+        user.setUserName(newName);
+        users.put(newName,user);
+    }
+
     public User findUser(String userName,String password){
         User user=users.get(userName);
         if (user!=null){
@@ -93,6 +100,15 @@ public class ControllCenter implements Serializable {
 
     }
 
+    public boolean checkPhone(String str) throws WrongFormatException {
+        if (Pattern.matches("[0-9]{10}",str)) {
+            return true;
+        }else {
+            throw new WrongFormatException("Your phone number is not valid");
+        }
+
+    }
+
     public boolean checkEmail(String str) throws WrongFormatException {
         if (Pattern.matches("(\\S.*\\S)(@)(\\S.*\\S)(.\\S[a-z]{2,3})",str)) {
             return true;
@@ -111,8 +127,8 @@ public class ControllCenter implements Serializable {
         }
     }
 
-    public DiscordServer createServer(String serverName,User owner){
-        DiscordServer discordServer=new DiscordServer(serverName,owner,this);
+    public DiscordServer createServer(String serverName,User owner,String welcome){
+        DiscordServer discordServer=new DiscordServer(serverName,owner,this,welcome);
         discordServers.put(discordServer.getServerName(),discordServer);
         owner.getDiscordServers().add(discordServer);
         return discordServer;

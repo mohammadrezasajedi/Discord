@@ -8,6 +8,7 @@ import com.discord.server.utils.exceptions.DuplicateException;
 import java.awt.desktop.PreferencesEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
@@ -46,7 +47,10 @@ public class DiscordServer implements Serializable {
     private HashMap<String, Channel> channels;
     private ControllCenter controllCenter;
     private HashMap<Member,HashMap<String,Channel>> blockedMembers;
-    public DiscordServer(String serverName, User serverOwner,ControllCenter controllCenter) {
+    private HashMap<Member,HashMap<String,Channel>> limitedChannels;
+    private String welcome;
+
+    public DiscordServer(String serverName, User serverOwner,ControllCenter controllCenter,String welcome) {
         this.serverName = serverName;
         this.serverOwner = serverOwner;
         this.controllCenter=controllCenter;
@@ -69,13 +73,16 @@ public class DiscordServer implements Serializable {
         member.getRoles().add("Owner");
         userRoles.put(serverOwner,member.getRoles());
         blockedMembers=new HashMap<>();
+        limitedChannels = new HashMap<>();
+
+        this.welcome = welcome;
     }
 
     public String getServerName() {
         return serverName;
     }
 
-    public void enterMember(User user, BufferedWriter writer, BufferedReader reader){
+    public void enterMember(User user, BufferedWriter writer, BufferedReader reader) throws IOException {
         Member member=members.get(user);
         member.setWriter(writer);
         member.setReader(reader);
@@ -90,6 +97,10 @@ public class DiscordServer implements Serializable {
         } else {
             return false;
         }
+    }
+
+    public String getWelcome() {
+        return welcome;
     }
 
     public Set<Access> getARoleAccesses (String str) {
@@ -128,7 +139,9 @@ public class DiscordServer implements Serializable {
         if (member != null) {
             if (member.isBlock()) {
                 return blockedMembers.get(member);
-            } else {
+            } else if (limitedChannels.containsKey(member)){
+                return limitedChannels.get(member);
+            }else {
                 return channels;
             }
         } else {
@@ -138,6 +151,19 @@ public class DiscordServer implements Serializable {
 
     public void addChannel(Channel channel){
         channels.put(channel.getName(),channel);
+    }
+
+    public void limitChanel(HashMap<String,Member> members,Channel channel){
+        channels.remove(channel.getName());
+        for (Member m : members.values()) {
+            if (limitedChannels.containsKey(m)) {
+                limitedChannels.get(m).put(channel.getName(),channel);
+            } else {
+                HashMap<String,Channel> channels = new HashMap<>(this.channels);
+                channels.put(channel.getName(),channel);
+                limitedChannels.put(m,channels);
+            }
+        }
     }
 
     public void removeChannel(String name){

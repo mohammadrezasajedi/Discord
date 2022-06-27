@@ -10,6 +10,8 @@ import com.discord.server.utils.exceptions.WrongFormatException;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class UserThread extends Thread{
 
@@ -370,9 +372,11 @@ public class UserThread extends Thread{
         boolean loop=true;
         methodWrite(Command.GETSERVERNAME.getStr());
         String serverName = null;
+        String welcome = null;
         while (loop) {
             try {
                 serverName = methodRead();
+                welcome = methodRead();
                 if (controllCenter.checkServerName(serverName)){
                     loop=false;
                 }
@@ -383,17 +387,222 @@ public class UserThread extends Thread{
             }
         }
 
-        DiscordServer server= controllCenter.createServer(serverName,this.user);
+        DiscordServer server= controllCenter.createServer(serverName,this.user,welcome);
         server(server);
     }
 
-    private void server(DiscordServer server){
+    private void server(DiscordServer server) throws IOException {
         server.enterMember(user,writer,reader);
     }
 
-    private void profile(){
+    private void profile() throws IOException {
+        boolean loop = true;
+        while (loop){
+            int choose = showMenu("1.user name\n2.password\n3.e-mail\n4.phone\n5.status\n6.picture\n7.exit\n",7);
+            switch (choose) {
+                case 1 :{
+                    userName();
+                    break;
+                }
+                case 2:{
+                    password();
+                    break;
+                }
+                case 3:{
+                    email();
+                    break;
+                }
+                case 4:{
+                    phone();
+                    break;
+                }
+                case 5:{
+                    status();
+                    break;
+                }
+                case 6:{
+                    picture();
+                    break;
+                }
+                case 7:{
+                    loop=false;
+                    break;
+                }
+            }
+        }
+    }
+
+    private void userName () throws IOException {
+        boolean loop = true;
+        while (loop) {
+            methodWrite(Command.PRINT.getStr());
+            methodWrite(user.getUserName());
+            int choose = showMenu("1.change\n2.exit",2);
+
+            switch (choose){
+                case 1 : {
+                    methodWrite(Command.GETUSERNAME.getStr());
+                    boolean l = true;
+                    String userName = null;
+                    while (l) {
+                        try {
+                            userName = reader.readLine();
+                            l = !controllCenter.checkUserName(userName);
+                        } catch (DuplicateException | WrongFormatException e) {
+                            methodWrite(Command.GETUSERNAMEAGAIN.getStr());
+                            methodWrite(e.toString());
+                            l = true;
+                        }
+                    }
+                    controllCenter.changeUserName(user.getUserName(),userName);
+                    break;
+                }
+                case 2:{
+                    loop = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    private void password() throws IOException {
+        boolean loop = true;
+        while (loop){
+            int choose = showMenu("1.change\n2.exit\n",2);
+            switch (choose){
+                case 1:{
+                    String password = null;
+                    methodWrite(Command.GETPASSWORD.getStr());
+                    boolean l = true;
+                    while (l) {
+                        try {
+                            password = reader.readLine();
+                            l = !controllCenter.checkPassword(password);
+                        } catch (WrongFormatException e) {
+                            methodWrite(Command.GETPASSWORDAGAIN.getStr());
+                            methodWrite(e.toString());
+                            l = true;
+                        }
+                    }
+
+                    user.setPassword(password);
+                    break;
+                }
+                case 2:{
+                    loop = false;
+                    break;
+                }
+            }
+
+        }
+    }
+
+    private void email() throws IOException {
+        boolean loop = true;
+        while (loop){
+            methodWrite(Command.PRINT.getStr());
+            methodWrite(user.getEmail());
+            int choose = showMenu("1.change\n2.exit\n",2);
+            switch (choose){
+                case 1:{
+                    methodWrite(Command.GETEMAIL.getStr());
+                    String email = null;
+                    boolean l = true;
+
+                    while (l) {
+                        try {
+                            email = reader.readLine();
+                            l = !controllCenter.checkEmail(email);
+                        } catch (WrongFormatException e) {
+                            methodWrite(Command.GETEMAILAGAIN.getStr());
+                            methodWrite(e.toString());
+                            l = true;
+                        }
+                    }
+                    user.setEmail(email);
+                    break;
+                }
+                case 2:{
+                    loop = false;
+                    break;
+                }
+            }
+
+        }
+    }
+
+    private void phone() throws IOException {
+        boolean loop = true;
+        while (loop){
+            if (user.getPhoneNumber()!=null){
+                methodWrite(Command.PRINT.getStr());
+                methodWrite(user.getPhoneNumber());
+            }
+            int choose = showMenu("1.change\n2.remove\n3.exit\n",3);
+            switch (choose){
+                case 1:{
+                    String phone = null;
+                    methodWrite(Command.GETPHONE.getStr());
+                    boolean l = true;
+                    while (l) {
+                        try {
+                            phone = reader.readLine();
+                            l = !controllCenter.checkPhone(phone);
+                        } catch (WrongFormatException e) {
+                            methodWrite(Command.GETPHONEAGAIN.getStr());
+                            methodWrite(e.toString());
+                            l = true;
+                        }
+                    }
+                    user.setPhoneNumber(phone);
+                }
+
+                case 2: {
+                    user.setPhoneNumber(null);
+                }
+                case 3:{
+                    loop = false;
+                    break;
+                }
+            }
+
+        }
+    }
+
+    private void status() throws IOException {
+        boolean loop = true;
+        while (loop){
+            methodWrite(Command.PRINT.getStr());
+            methodWrite(user.getStatus().getName());
+            int choose = showMenu("1.change\n2.exit\n",2);
+            switch (choose){
+                case 1: {
+                    ArrayList<User.Status> statuses = new ArrayList<>(List.of(User.Status.values()));
+                    statuses.removeIf(w -> w.equals(User.Status.OFFLINE));
+
+                    StringBuilder sb = new StringBuilder();
+                    int i = 1;
+                    for (User.Status status : statuses) {
+                        sb.append(i++).append(".").append(status.getName()).append("\n");
+                    }
+                    int choice = showMenu(sb.toString(), 4);
+                    user.setStatus(statuses.get(choice - 1));
+                }
+                case 2:{
+                    loop = false;
+                    break;
+                }
+            }
+
+        }
+    }
+
+    private void picture() {
 
     }
+
+
+
     private void logOut () {
         if (user.getStatus()== User.Status.ONLINE){
             user.setStatus(User.Status.OFFLINE);

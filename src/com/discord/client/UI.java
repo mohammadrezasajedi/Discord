@@ -75,6 +75,12 @@ public class UI {
         Scanner sc=new Scanner(System.in);
         return sc.nextLine();
     }
+
+    public static String getWelcome(){
+        System.out.println("Please enter your welcome message");
+        Scanner sc=new Scanner(System.in);
+        return sc.nextLine();
+    }
     public static String getRoleName(){
         System.out.println("Please enter your Role name");
         Scanner sc=new Scanner(System.in);
@@ -97,6 +103,18 @@ public class UI {
         Scanner sc=new Scanner(System.in);
         return sc.nextLine();
     }
+    public static String getPhone(){
+        System.out.println("Please enter your Phone number");
+        Scanner sc=new Scanner(System.in);
+        return sc.nextLine();
+    }
+    public static String getPhone(String str){
+        System.out.println(str);
+        System.out.println("Please enter your Phone number again");
+        Scanner sc=new Scanner(System.in);
+        return sc.nextLine();
+    }
+
 
 
 }

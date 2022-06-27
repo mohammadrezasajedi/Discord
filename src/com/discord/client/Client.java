@@ -80,11 +80,13 @@ public class Client {
                         break;
                     }
                     case GETSERVERNAME:{
-                        respond=UI.getServerName();
+                        methodWrite(UI.getServerName());
+                        respond = UI.getWelcome();
                         break;
                     }
                     case GETSERVERNAMEAGAIN:{
-                        respond=UI.getServerName(methodRead());
+                        methodWrite(UI.getServerName(methodRead()));
+                        respond = UI.getWelcome();
                         break;
                     }
                     case GETROLENAME:{
@@ -101,6 +103,14 @@ public class Client {
                     }
                     case GETCHANNELNAMEAGAIN:{
                         respond=UI.getChannelName(methodRead());
+                        break;
+                    }
+                    case GETPHONE:{
+                        respond=UI.getPhone();
+                        break;
+                    }
+                    case GETPHONEAGAIN:{
+                        respond=UI.getPhone(methodRead());
                         break;
                     }
                     case EXIT:{

@@ -5,12 +5,14 @@ import com.discord.server.utils.Massage;
 import com.discord.server.utils.User;
 import com.discord.server.utils.discordServer.Member;
 import com.discord.server.utils.discordServer.channels.TextChannel;
+import com.discord.server.utils.exceptions.WrongFormatException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.Serializable;
 
-public class ChannelChatIO implements Runnable{
+public class ChannelChatIO implements Runnable, Serializable {
     private transient BufferedWriter writer;
     private transient BufferedReader reader;
     private Member member;
@@ -28,7 +30,31 @@ public class ChannelChatIO implements Runnable{
         try {
             String str = methodRead();
             while (!str.equals("#exit")){
-                textChannel.sendMassage(new Massage(str,member.getUser(),textChannel.getId()));
+                try {
+                    if (str.contains("#like")) {
+                        String[] strings = str.split("-");
+                        long id = Long.parseLong(strings[1]);
+                        textChannel.like(id,member.getUser());
+                    } else if (str.contains("#dislike")){
+                        String[] strings = str.split("-");
+                        long id = Long.parseLong(strings[1]);
+                        textChannel.dislike(id,member.getUser());
+                    }else if (str.contains("#laughter")){
+                        String[] strings = str.split("-");
+                        long id = Long.parseLong(strings[1]);
+                        textChannel.laughter(id,member.getUser());
+                    }else if (str.contains("#pin")){
+                        String[] strings = str.split("-");
+                        long id = Long.parseLong(strings[1]);
+                        textChannel.pin(id,member.getUser());
+                    } else if (str.contains("#getpm")){
+                        textChannel.getPinned(this);
+                    } else {
+                        textChannel.sendMassage(new Massage(str,member.getUser(),textChannel.getId()));
+                    }
+                } catch (NumberFormatException | WrongFormatException | ArrayIndexOutOfBoundsException e){
+                    System.err.println(member.getUser().getUserName() + " sent an unacceptable command");
+                }
                 str = methodRead();
             }
             textChannel.endUserChat(member.getUser());
@@ -42,6 +68,14 @@ public class ChannelChatIO implements Runnable{
             if (!massage.getAuthor().equals(member.getUser())) {
                 methodWrite(massage.toString());
             }
+        } catch (IOException e){
+            System.err.println("Couldn't Send Message");
+        }
+    }
+
+    public void broadcast (String str) {
+        try {
+            methodWrite(str);
         } catch (IOException e){
             System.err.println("Couldn't Send Message");
         }

@@ -1,5 +1,6 @@
 package com.discord.server;
 
+import com.discord.server.utils.FileStream;
 import com.discord.server.utils.discordServer.DiscordServer;
 import com.discord.server.utils.User;
 import com.discord.server.utils.exceptions.DuplicateException;
@@ -7,6 +8,7 @@ import com.discord.server.utils.exceptions.WrongFormatException;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,12 +22,17 @@ public class ControllCenter implements Serializable {
     private HashMap<String,DiscordServer> discordServers;
     private transient ArrayList<UserThread> threads;
     private transient ExecutorService pool;
+    private transient ServerSocket fileSocket;
 
-    public ControllCenter() {
+    public ControllCenter() throws IOException {
         users=new HashMap<>();
         discordServers=new HashMap<>();
         threads=new ArrayList<>();
         pool= Executors.newCachedThreadPool();
+    }
+
+    public void setFileSocket(ServerSocket fileSocket) {
+        this.fileSocket = fileSocket;
     }
 
     public ControllCenter(ControllCenter controllCenter){
@@ -34,9 +41,9 @@ public class ControllCenter implements Serializable {
         threads=new ArrayList<>();
         pool=Executors.newCachedThreadPool();
     }
-    public void init(Socket socket) {
+    public void init(Socket socket) throws IOException {
         try {
-            UserThread userThread=new UserThread(this,socket);
+            UserThread userThread=new UserThread(fileSocket,this,socket);
             threads.add(userThread);
             pool.execute(userThread);
         }
@@ -127,8 +134,8 @@ public class ControllCenter implements Serializable {
         }
     }
 
-    public DiscordServer createServer(String serverName,User owner,String welcome){
-        DiscordServer discordServer=new DiscordServer(serverName,owner,this,welcome);
+    public DiscordServer createServer(FileStream fileStream, String serverName, User owner, String welcome){
+        DiscordServer discordServer=new DiscordServer(fileStream,serverName,owner,this,welcome);
         discordServers.put(discordServer.getServerName(),discordServer);
         owner.getDiscordServers().add(discordServer);
         return discordServer;

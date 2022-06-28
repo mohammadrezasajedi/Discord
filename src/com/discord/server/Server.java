@@ -48,6 +48,8 @@ public class Server {
         while (flag[0]) {
             try {
                 ServerSocket serverSocket = new ServerSocket(8989);
+                ServerSocket fileSocket = new ServerSocket(8888);
+                controllCenter.setFileSocket(fileSocket);
                 while (true) {
                     Socket socket = serverSocket.accept();
                     controllCenter.init(socket);

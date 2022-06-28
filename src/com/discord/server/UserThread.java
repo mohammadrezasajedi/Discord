@@ -1,13 +1,16 @@
 package com.discord.server;
 
 import com.discord.Command;
+import com.discord.server.utils.FileStream;
 import com.discord.server.utils.discordServer.DiscordServer;
 import com.discord.server.utils.PrivateChat;
 import com.discord.server.utils.User;
 import com.discord.server.utils.exceptions.DuplicateException;
 import com.discord.server.utils.exceptions.WrongFormatException;
 
+import java.awt.*;
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,12 +23,14 @@ public class UserThread extends Thread{
     private final BufferedWriter writer;
     private final BufferedReader reader;
     private User user;
+    private transient FileStream fileStream;
 
-    public UserThread(ControllCenter controllCenter, Socket socket) throws IOException {
+    public UserThread(ServerSocket serverSocket, ControllCenter controllCenter, Socket socket) throws IOException {
         this.controllCenter = controllCenter;
         this.socket = socket;
         writer=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         reader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        fileStream = new FileStream(serverSocket);
     }
 
 
@@ -48,6 +53,8 @@ public class UserThread extends Thread{
                     exit();
                     break;
                 }
+
+                fileStream.setUser(user);
 
                 if (user.getStatus() == User.Status.OFFLINE) {
                     user.setStatus(User.Status.ONLINE);
@@ -322,7 +329,7 @@ public class UserThread extends Thread{
                 loop = false;
             } else {
                 if (!user.getPrivateChats().containsKey(user.getFriends().get(choose - 2).getUserName())){
-                    PrivateChat privateChat = new PrivateChat(user,user.getFriends().get(choose - 2));
+                    PrivateChat privateChat = new PrivateChat(user,user.getFriends().get(choose - 2),fileStream);
                     user.addPrivateChat(user.getFriends().get(choose - 2),privateChat);
                     user.getFriends().get(choose - 2).addPrivateChat(user,privateChat);
                 }
@@ -387,7 +394,7 @@ public class UserThread extends Thread{
             }
         }
 
-        DiscordServer server= controllCenter.createServer(serverName,this.user,welcome);
+        DiscordServer server= controllCenter.createServer(fileStream,serverName,this.user,welcome);
         server(server);
     }
 
@@ -597,8 +604,10 @@ public class UserThread extends Thread{
         }
     }
 
-    private void picture() {
-
+    private void picture() throws IOException {
+        methodWrite(Command.GETPROFILEPICTURE.getStr());
+        File file = fileStream.receiveFile();
+        user.setImageFile(file);
     }
 
 

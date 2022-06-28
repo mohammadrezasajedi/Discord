@@ -4,10 +4,7 @@ import com.discord.Command;
 import com.discord.server.utils.chat.privateChat.PrivateChatReader;
 import com.discord.server.utils.chat.privateChat.PrivateChatWriter;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -15,8 +12,10 @@ public class PrivateChat implements Serializable {
     private User user1;
     private User user2;
     private HashMap<Long,Massage> massages;
+    private HashMap<Massage, File> files;
     private transient ArrayList<PrivateChatWriter> observers;
     private  long keepId;
+    private FileStream fileStream;
 
     public void sendMassage(Massage massage){
         massages.put(massage.getId(),massage);
@@ -24,16 +23,22 @@ public class PrivateChat implements Serializable {
         t.start();
     }
 
-    public PrivateChat(User user1, User user2) {
+    public PrivateChat(User user1, User user2,FileStream fileStream) {
         this.user1 = user1;
         this.user2 = user2;
         this.massages = new HashMap<>();
         observers = new ArrayList<>();
         keepId = 0L;
+        this.fileStream = fileStream;
+        this.files = new HashMap<>();
     }
 
     public Long getId () {
         return keepId++;
+    }
+
+    public Long getHis(){
+        return keepId;
     }
 
     public User getUser1() {
@@ -57,7 +62,7 @@ public class PrivateChat implements Serializable {
         for (Long l: massages.keySet()) {
             privateChatWriter.Initbroadcast(massages.get(l));
         }
-        PrivateChatReader privateChatReader = new PrivateChatReader(reader,this,user);
+        PrivateChatReader privateChatReader = new PrivateChatReader(fileStream,reader,this,user);
         privateChatReader.run();
     }
 
@@ -75,6 +80,24 @@ public class PrivateChat implements Serializable {
     private void update(Massage massage) {
         for (PrivateChatWriter w: observers) {
             w.broadcast(massage);
+        }
+    }
+
+    public HashMap<Massage, File> getFiles() {
+        return files;
+    }
+
+    public File getFileMessage (long id){
+        Massage massage = massages.get(id);
+        if (massage != null){
+            File file = files.get(massage);
+            if ((file != null) && (file.exists())){
+                return file;
+            } else {
+                return null;
+            }
+        } else {
+            return null;
         }
     }
 

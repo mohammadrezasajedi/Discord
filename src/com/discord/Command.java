@@ -1,6 +1,7 @@
 package com.discord;
 
 public enum Command{
+    GETPROFILEPICTURE("getProfilePicture"),
     GETPHONE("getPhone"),
     GETPHONEAGAIN("getPhoneAgain"),
     GETCHANNELNAME("getChannelName"),

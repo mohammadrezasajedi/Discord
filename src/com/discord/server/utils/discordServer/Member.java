@@ -1,6 +1,7 @@
 package com.discord.server.utils.discordServer;
 
 import com.discord.Command;
+import com.discord.server.utils.FileStream;
 import com.discord.server.utils.User;
 import com.discord.server.utils.discordServer.channels.Channel;
 import com.discord.server.utils.discordServer.channels.TextChannel;
@@ -26,13 +27,15 @@ public class Member implements Serializable {
     private transient BufferedReader reader;
     private boolean block;
     private boolean firstTime;
-    public Member(User user,DiscordServer discordServer) {
+    private FileStream fileStream;
+    public Member(FileStream fileStream,User user,DiscordServer discordServer) {
         this.user = user;
         this.discordServer=discordServer;
         roles=new HashSet<>();
          block=false;
          firstTime = true;
          historyKeeper = new HashMap<>();
+         this.fileStream = fileStream;
     }
 
     public HashSet<String> getRoles() {
@@ -454,11 +457,11 @@ public class Member implements Serializable {
         Channel channel = null;
         switch (choose){
             case 1:{
-                channel = new TextChannel(name,discordServer,false);
+                channel = new TextChannel(fileStream,name,discordServer,false);
                 break;
             }
             case 2:{
-                channel = new VoiceChannel(name,false);
+                channel = new VoiceChannel(fileStream,name,discordServer,false);
                 break;
             }
         }

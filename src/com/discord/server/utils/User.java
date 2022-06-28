@@ -3,6 +3,7 @@ package com.discord.server.utils;
 import com.discord.server.utils.discordServer.DiscordServer;
 
 import java.awt.*;
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,14 +33,14 @@ public class User implements Serializable {
     private String password;
     private String email;
     private String phoneNumber;
-    private Image imageFile;
+    private File imageFile;
     private Status status;
     private ArrayList<User> requests;
     private ArrayList<User> friends;
     private HashMap<String,PrivateChat> privateChats;
     private ArrayList<User> blockUsers;
     private ArrayList<DiscordServer> discordServers;
-    public User(String userName, String password, String email, String phoneNumber,Image imageFile){
+    public User(String userName, String password, String email, String phoneNumber,File imageFile){
         this.userName = userName;
         this.password = password;
         this.email = email;
@@ -68,7 +69,7 @@ public class User implements Serializable {
         return phoneNumber;
     }
 
-    public Image getImageFile() {
+    public File getImageFile() {
         return imageFile;
     }
 
@@ -145,7 +146,7 @@ public class User implements Serializable {
         this.phoneNumber = phoneNumber;
     }
 
-    public void setImageFile(Image imageFile) {
+    public void setImageFile(File imageFile) {
         this.imageFile = imageFile;
     }
 

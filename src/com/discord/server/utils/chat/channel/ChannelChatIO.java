@@ -1,28 +1,28 @@
 package com.discord.server.utils.chat.channel;
 
 import com.discord.Command;
+import com.discord.server.utils.FileStream;
 import com.discord.server.utils.Massage;
 import com.discord.server.utils.User;
 import com.discord.server.utils.discordServer.Member;
 import com.discord.server.utils.discordServer.channels.TextChannel;
 import com.discord.server.utils.exceptions.WrongFormatException;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 
 public class ChannelChatIO implements Runnable, Serializable {
     private transient BufferedWriter writer;
     private transient BufferedReader reader;
     private Member member;
     private TextChannel textChannel;
+    private FileStream fileStream;
 
-    public ChannelChatIO(BufferedWriter writer, BufferedReader reader, Member member, TextChannel textChannel) {
+    public ChannelChatIO(FileStream fileStream,BufferedWriter writer, BufferedReader reader, Member member, TextChannel textChannel) {
         this.writer = writer;
         this.reader = reader;
         this.member = member;
         this.textChannel = textChannel;
+        this.fileStream = fileStream;
     }
 
     @Override
@@ -49,7 +49,19 @@ public class ChannelChatIO implements Runnable, Serializable {
                         textChannel.pin(id,member.getUser());
                     } else if (str.contains("#getpm")){
                         textChannel.getPinned(this);
-                    } else {
+                    } else if (str.equals("#sendFile")){
+                        File file = fileStream.receiveFile(textChannel,member);
+                        str = member.getUser().getUserName() +  " has sent a file to chat -- #download";
+                        Massage massage =new Massage(str,member.getUser(),textChannel.getId());
+                        textChannel.sendMassage(massage);
+                        textChannel.getFiles().put(massage,file);
+                    } else if (str.contains("#download")){
+                        String[] strings = str.split("-");
+                        long id = Long.parseLong(strings[1]);
+                        File file = textChannel.getFileMessage(id);
+                        fileStream.sendFile(file);
+                    }
+                    else {
                         textChannel.sendMassage(new Massage(str,member.getUser(),textChannel.getId()));
                     }
                 } catch (NumberFormatException | WrongFormatException | ArrayIndexOutOfBoundsException e){

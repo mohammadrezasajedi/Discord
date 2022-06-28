@@ -1,6 +1,7 @@
 package com.discord.server.utils.discordServer;
 
 import com.discord.server.ControllCenter;
+import com.discord.server.utils.FileStream;
 import com.discord.server.utils.User;
 import com.discord.server.utils.discordServer.channels.Channel;
 import com.discord.server.utils.exceptions.DuplicateException;
@@ -49,17 +50,18 @@ public class DiscordServer implements Serializable {
     private HashMap<Member,HashMap<String,Channel>> blockedMembers;
     private HashMap<Member,HashMap<String,Channel>> limitedChannels;
     private String welcome;
+    private FileStream fileStream;
 
-    public DiscordServer(String serverName, User serverOwner,ControllCenter controllCenter,String welcome) {
+    public DiscordServer(FileStream fileStream,String serverName, User serverOwner,ControllCenter controllCenter,String welcome) {
         this.serverName = serverName;
         this.serverOwner = serverOwner;
         this.controllCenter=controllCenter;
         members=new HashMap<>();
-        Member member=new Member(serverOwner,this);
+        Member member=new Member(fileStream,serverOwner,this);
         HashSet<Access> ownerAccess = new HashSet<>();
         ownerAccess.addAll(Arrays.asList(Access.values()));
         member.getRoles().add("Owner");
-
+        this.fileStream = fileStream;
         members.put(serverOwner,member);
         userRoles=new HashMap<>();
         roleAccesses = new HashMap<>();
@@ -181,7 +183,7 @@ public class DiscordServer implements Serializable {
     public boolean addUser (String userName){
         User user = controllCenter.findUser(userName);
         if (user != null){
-            Member member = new Member(user,this);
+            Member member = new Member(fileStream,user,this);
             member.getRoles().add("User");
             userRoles.put(user,member.getRoles());
             members.put(user,member);

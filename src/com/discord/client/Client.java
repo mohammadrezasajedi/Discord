@@ -5,6 +5,7 @@ import com.discord.client.chat.ReadThread;
 import com.discord.client.chat.WriteThread;
 import com.discord.server.UserThread;
 
+import javax.xml.crypto.Data;
 import java.io.*;
 import java.net.Socket;
 import java.time.LocalDate;
@@ -16,11 +17,15 @@ public class Client {
 
     private static BufferedReader reader;
     private static BufferedWriter writer;
+    private static Socket socket;
+    private static ClientFileStream fileStream;
+
     public static void main(String[] args) {
         try {
-            Socket socket=new Socket("localhost",8989);
+            socket=new Socket("localhost",8989);
             reader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
             writer=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            fileStream = new ClientFileStream();
             System.out.println("Connected");
             String str = methodRead();
             UI.welcome(str);
@@ -113,16 +118,17 @@ public class Client {
                         respond=UI.getPhone(methodRead());
                         break;
                     }
+                    case GETPROFILEPICTURE:{
+                        fileStream.sendFile(UI.getProfilePicture());
+                        break;
+                    }
                     case EXIT:{
                         UI.exit();
                         System.exit(0);
                         break;
                     }
 
-
                 }
-
-
 
 
                 if (respond != null) {
@@ -138,11 +144,11 @@ public class Client {
     }
 
     private static void chatMode(){
-        WriteThread writeThread = new WriteThread(writer);
+        WriteThread writeThread = new WriteThread(writer,fileStream);
         Thread thread = new Thread(writeThread);
         thread.start();
 
-        ReadThread readThread = new ReadThread(reader);
+        ReadThread readThread = new ReadThread(reader,fileStream);
         readThread.run();
 
         if (thread.isAlive()){
@@ -163,8 +169,5 @@ public class Client {
         writer.newLine();
         writer.flush();
     }
-
-
-
-
 }
+

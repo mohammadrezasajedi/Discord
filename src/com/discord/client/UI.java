@@ -1,5 +1,6 @@
 package com.discord.client;
 
+import java.io.File;
 import java.util.Scanner;
 
 public class UI {
@@ -115,6 +116,22 @@ public class UI {
         return sc.nextLine();
     }
 
+    public static File getProfilePicture(){
+        System.out.println("Please enter your Profile picture address");
+        Scanner sc=new Scanner(System.in);
+        File file = null;
+        boolean loop = true;
+        while (loop) {
+            file = new File(sc.nextLine());
+            if (file.exists()){
+                loop = false;
+            } else {
+                System.out.println("Address is not valid.");
+                file = new File(sc.nextLine());
+            }
+        }
+        return file;
+    }
 
 
 }

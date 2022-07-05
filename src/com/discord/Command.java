@@ -10,6 +10,7 @@ public enum Command{
     GETROLENAMEAGAIN("getRoleNameAgain"),
     GETSERVERNAMEAGAIN("getServerNameAgain"),
     GETSERVERNAME("getServerName"),
+    GETWELLCOME("GetWellCome"),
     ENTERCHATMODE("enterChatMode"),
     EXITCHATMODE("#exitChatMode"),
     CREATEFRIEND("createFriend"),
@@ -21,6 +22,9 @@ public enum Command{
     GETEMAIL("getEmail"),
     GETEMAILAGAIN("getEmailAgain"),
     SHOWMENU("showMenu"),
+    RESETMENU("resetMenu"),
+    PRINTWELLCOME("PrintWellCome"),
+    GETTABLE("getTable"),
     EXIT("exit")
     ;
 

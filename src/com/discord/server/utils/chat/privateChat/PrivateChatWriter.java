@@ -25,9 +25,7 @@ public class PrivateChatWriter implements Serializable {
 
     public void broadcast (Massage massage) {
         try {
-            if (!massage.getAuthor().equals(user)) {
-                methodWrite(massage.toString());
-            }
+            methodWrite(massage.toString());
         } catch (IOException e){
             System.err.println("Couldn't Send Message");
         }

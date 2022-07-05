@@ -54,6 +54,12 @@ public class PrivateChat implements Serializable {
             writer.write(Command.ENTERCHATMODE.getStr());
             writer.newLine();
             writer.flush();
+
+            User u = user.equals(user1) ? user2 : user1;
+
+            writer.write(u.getUserName());
+            writer.newLine();
+            writer.flush();
         } catch (IOException e) {
             Thread.currentThread().interrupt();
         }

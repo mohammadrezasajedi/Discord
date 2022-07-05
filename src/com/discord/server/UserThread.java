@@ -2,6 +2,7 @@ package com.discord.server;
 
 import com.discord.Command;
 import com.discord.server.utils.FileStream;
+import com.discord.server.utils.NotificationStream;
 import com.discord.server.utils.discordServer.DiscordServer;
 import com.discord.server.utils.PrivateChat;
 import com.discord.server.utils.User;
@@ -25,12 +26,15 @@ public class UserThread extends Thread{
     private User user;
     private transient FileStream fileStream;
 
-    public UserThread(ServerSocket serverSocket, ControllCenter controllCenter, Socket socket) throws IOException {
+    private transient NotificationStream notificationStream;
+
+    public UserThread(ServerSocket fileserverSocket, ControllCenter controllCenter, Socket socket,Socket notifSocket) throws IOException {
         this.controllCenter = controllCenter;
         this.socket = socket;
         writer=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         reader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        fileStream = new FileStream(serverSocket);
+        notificationStream = new NotificationStream(notifSocket);
+        fileStream = new FileStream(fileserverSocket);
     }
 
 
@@ -39,10 +43,10 @@ public class UserThread extends Thread{
     public void run() {
         try {
             boolean app = true;
+            System.out.println("Wellcome Sent");
+            methodWrite("Welcome to discord.\n");
+            Thread.sleep(5*1000);
             while (app) {
-                System.out.println("Wellcome Sent");
-                methodWrite("Welcome to discord.\n");
-
                 int choose = showMenu("1.Login\n2.Signup\n3.exit", 3);
                 if (choose == 1) {
                     login();
@@ -60,8 +64,7 @@ public class UserThread extends Thread{
                     user.setStatus(User.Status.ONLINE);
                 }
 
-                methodWrite(Command.PRINT.getStr());
-                methodWrite("Well Come " + user.getUserName());
+                notificationStream.sendPopUp("WellCome",user.getUserName());
 
 
                 boolean loop = true;
@@ -100,6 +103,9 @@ public class UserThread extends Thread{
             if (user.getStatus()== User.Status.ONLINE){
                 user.setStatus(User.Status.OFFLINE);
             }
+            notificationStream.close();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -143,15 +149,16 @@ public class UserThread extends Thread{
                 str="Your Friend Request has been sent.";
             }
         }
-        methodWrite(Command.PRINT.getStr());
-        methodWrite(str);
+        notificationStream.sendPopUp("Friend Request Status",str);
     }
 
     private void showFriends() throws IOException {
+        methodWrite(Command.GETTABLE.getStr());
+        methodWrite(String.valueOf(user.getFriends().size()));
         for (User u:user.getFriends()) {
-            methodWrite(Command.PRINT.getStr());
             methodWrite(u.getUserName()+" : "+u.getStatus().getName());
         }
+        methodRead();
     }
     private void friendRequest() throws IOException {
         boolean loop=true;
@@ -170,8 +177,8 @@ public class UserThread extends Thread{
                 loop=false;
             }else {
                 User u = user.getRequests().get(choose - 2);
-                methodWrite(Command.PRINT.getStr());
-                methodWrite("Accept " + u.getUserName() + "?");
+//                methodWrite(Command.PRINT.getStr());
+//                methodWrite("Accept " + u.getUserName() + "?");
                 int choice=showMenu("1.YES\n2.NO",2);
                 if (choice==1){
                     u.addFriend(user);
@@ -260,8 +267,8 @@ public class UserThread extends Thread{
                 if (user!=null){
                     loop=false;
                 }else {
-                    methodWrite(Command.PRINT.getStr());
-                    methodWrite("Your user name or password is not valid");
+                    notificationStream.sendPopUp("Login Failed","Your user name or password is not valid");
+                    methodWrite(Command.RESETMENU.getStr());
                     loop=true;
                     count++;
                 }
@@ -383,7 +390,6 @@ public class UserThread extends Thread{
         while (loop) {
             try {
                 serverName = methodRead();
-                welcome = methodRead();
                 if (controllCenter.checkServerName(serverName)){
                     loop=false;
                 }
@@ -393,6 +399,8 @@ public class UserThread extends Thread{
                 methodWrite(e.toString());
             }
         }
+        methodWrite(Command.GETWELLCOME.getStr());
+        welcome = methodRead();
 
         DiscordServer server= controllCenter.createServer(fileStream,serverName,this.user,welcome);
         server(server);
@@ -442,8 +450,8 @@ public class UserThread extends Thread{
     private void userName () throws IOException {
         boolean loop = true;
         while (loop) {
-            methodWrite(Command.PRINT.getStr());
-            methodWrite(user.getUserName());
+//            methodWrite(Command.PRINT.getStr());
+//            methodWrite(user.getUserName());
             int choose = showMenu("1.change\n2.exit",2);
 
             switch (choose){
@@ -507,8 +515,8 @@ public class UserThread extends Thread{
     private void email() throws IOException {
         boolean loop = true;
         while (loop){
-            methodWrite(Command.PRINT.getStr());
-            methodWrite(user.getEmail());
+//            methodWrite(Command.PRINT.getStr());
+//            methodWrite(user.getEmail());
             int choose = showMenu("1.change\n2.exit\n",2);
             switch (choose){
                 case 1:{
@@ -542,8 +550,8 @@ public class UserThread extends Thread{
         boolean loop = true;
         while (loop){
             if (user.getPhoneNumber()!=null){
-                methodWrite(Command.PRINT.getStr());
-                methodWrite(user.getPhoneNumber());
+//                methodWrite(Command.PRINT.getStr());
+//                methodWrite(user.getPhoneNumber());
             }
             int choose = showMenu("1.change\n2.remove\n3.exit\n",3);
             switch (choose){
@@ -579,8 +587,8 @@ public class UserThread extends Thread{
     private void status() throws IOException {
         boolean loop = true;
         while (loop){
-            methodWrite(Command.PRINT.getStr());
-            methodWrite(user.getStatus().getName());
+//            methodWrite(Command.PRINT.getStr());
+//            methodWrite(user.getStatus().getName());
             int choose = showMenu("1.change\n2.exit\n",2);
             switch (choose){
                 case 1: {
@@ -622,6 +630,7 @@ public class UserThread extends Thread{
     private void exit() throws IOException {
         methodWrite(Command.EXIT.getStr());
         System.out.println("a Client Left.");
+        notificationStream.close();
         Thread.currentThread().interrupt();
     }
 

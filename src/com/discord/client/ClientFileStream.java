@@ -82,11 +82,6 @@ public class ClientFileStream {
     }
 
     private void methodWrite (String str) throws IOException {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         writer.write(str);
         writer.newLine();
         writer.flush();

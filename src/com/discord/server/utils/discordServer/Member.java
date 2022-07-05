@@ -51,17 +51,22 @@ public class Member implements Serializable {
     }
 
     public void start() throws IOException {
-        if (firstTime){
-            methodWrite(Command.PRINT.getStr());
+        if (firstTime) {
+            methodWrite(Command.PRINTWELLCOME.getStr());
             methodWrite(discordServer.getWelcome());
             firstTime = false;
-            for (Channel c: discordServer.getChannels(this).values()) {
-                if (c.isHistory()){
-                    historyKeeper.put(c,c.getHistory());
+            for (Channel c : discordServer.getChannels(this).values()) {
+                if (c.isHistory()) {
+                    historyKeeper.put(c, c.getHistory());
                 } else {
-                    historyKeeper.put(c,0L);
+                    historyKeeper.put(c, 0L);
                 }
             }
+        }
+        try {
+            Thread.sleep(5 * 1000);
+        } catch (InterruptedException e){
+            e.printStackTrace();
         }
         boolean loop=true;
         while (loop){
@@ -100,15 +105,18 @@ public class Member implements Serializable {
                 if (user.getStatus()== User.Status.ONLINE){
                     user.setStatus(User.Status.OFFLINE);
                 }
+
             }
         }
     }
 
     private void showMembers () throws IOException {
+        methodWrite(Command.GETTABLE.getStr());
+        methodWrite(String.valueOf(discordServer.getMembers().size()));
         for (User u:discordServer.getMembers().keySet()) {
-            methodWrite(Command.PRINT.getStr());
             methodWrite(u.getUserName()+" : "+u.getStatus().getName());
         }
+        methodRead();
     }
 
     private void setting() throws IOException {
@@ -411,8 +419,8 @@ public class Member implements Serializable {
             }
 
             while (exit){
-                methodWrite(Command.PRINT.getStr());
-                methodWrite("Are you sure?");
+//                methodWrite(Command.PRINT.getStr());
+//                methodWrite("Are you sure?");
                 sb = new StringBuilder("1.YES\n2.NO\n");
                 choose = showMenu(sb.toString(),2);
 

@@ -41,9 +41,9 @@ public class ControllCenter implements Serializable {
         threads=new ArrayList<>();
         pool=Executors.newCachedThreadPool();
     }
-    public void init(Socket socket) throws IOException {
+    public void init(Socket socket,Socket notifSocket) throws IOException {
         try {
-            UserThread userThread=new UserThread(fileSocket,this,socket);
+            UserThread userThread=new UserThread(fileSocket,this,socket,notifSocket);
             threads.add(userThread);
             pool.execute(userThread);
         }

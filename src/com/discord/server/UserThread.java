@@ -612,13 +612,10 @@ public class UserThread extends Thread{
 
     private void picture() throws IOException {
         methodWrite(Command.GETPROFILEPICTURE.getStr());
-        String input = methodRead();
-        if (!methodRead().equals("#exit")) {
-            String[] fname = input.split("\\.");
-            File file = new File("./Profs/" + user.getUserName() + "." + fname[fname.length - 1]);
-            fileStream.receiveFile(file);
-            user.setImageFile(file);
-        }
+        String [] fname = methodRead().split("\\.");
+        File file = new File("./Profs/" + user.getUserName() + "." +fname[fname.length - 1]);
+        fileStream.receiveFile(file);
+        user.setImageFile(file);
     }
 
 

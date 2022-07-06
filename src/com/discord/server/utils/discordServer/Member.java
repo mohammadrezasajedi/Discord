@@ -68,11 +68,6 @@ public class Member implements Serializable {
                 e.printStackTrace();
             }
         }
-        try {
-            Thread.sleep(5 * 1000);
-        } catch (InterruptedException e){
-            e.printStackTrace();
-        }
         boolean loop=true;
         while (loop){
             try {

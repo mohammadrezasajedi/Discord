@@ -58,10 +58,10 @@ public class VoiceChannelIO implements Runnable, Serializable {
 //                            voiceChannel.getFiles().put(massage, file);
 //                        }
                     } else if (str.contains("#download")){
-                        String[] strings = str.split("-");
-                        long id = Long.parseLong(strings[1]);
-                        File file = voiceChannel.getFileMessage(id);
-                        fileStream.sendFile(file);
+//                        String[] strings = str.split("-");
+//                        long id = Long.parseLong(strings[1]);
+//                        File file = voiceChannel.getFileMessage(id);
+//                        fileStream.sendFile(file);
                     }
                 } catch (NumberFormatException | WrongFormatException | ArrayIndexOutOfBoundsException e){
                     System.err.println(member.getUser().getUserName() + " sent an unacceptable command");

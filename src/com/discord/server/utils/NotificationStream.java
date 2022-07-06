@@ -7,33 +7,35 @@ public class NotificationStream {
 
     private Socket socket;
 
-    private ObjectOutputStream out;
+    private BufferedWriter out;
 
     public NotificationStream(Socket socket) throws IOException {
         this.socket = socket;
-        out = new ObjectOutputStream(socket.getOutputStream());
+        out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
     }
 
     public void sendPopUp (String title,String desc){
         try {
-            out.writeUTF("popUp");
-            out.flush();
-            out.writeUTF(title);
-            out.flush();
-            out.writeUTF(desc);
-            out.flush();
+            methodWrite("popUp");
+            methodWrite(title);
+            methodWrite(desc);
         } catch (IOException e){
             e.printStackTrace();
         }
     }
 
+    private void methodWrite (String str) throws IOException {
+        out.write(str);
+        out.newLine();
+        out.flush();
+    }
+
     public void close () {
         try {
-            out.writeUTF("exit");
-            out.flush();
+            methodWrite("exit");
             out.close();
         } catch (IOException e){
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
     }
 }

@@ -50,6 +50,9 @@ public class UserThread extends Thread{
                 int choose = showMenu("1.Login\n2.Signup\n3.exit", 3);
                 if (choose == 1) {
                     login();
+                    if (user == null){
+                        exit();
+                    }
                 } else if (choose == 2){
                     signUp();
                 } else {
@@ -61,6 +64,7 @@ public class UserThread extends Thread{
                 if (user != null && user.getStatus() == User.Status.OFFLINE) {
                     user.setStatus(User.Status.ONLINE);
                 }
+
 
                 notificationStream.sendPopUp("WellCome",user.getUserName());
 
@@ -98,7 +102,7 @@ public class UserThread extends Thread{
 
         } catch (IOException e) {
             Thread.currentThread().interrupt();
-            if (user.getStatus()== User.Status.ONLINE){
+            if (user != null && user.getStatus()== User.Status.ONLINE){
                 user.setStatus(User.Status.OFFLINE);
             }
             notificationStream.close();
@@ -334,7 +338,7 @@ public class UserThread extends Thread{
                 loop = false;
             } else {
                 if (!user.getPrivateChats().containsKey(user.getFriends().get(choose - 2).getUserName())){
-                    PrivateChat privateChat = new PrivateChat(user,user.getFriends().get(choose - 2),fileStream);
+                    PrivateChat privateChat = new PrivateChat(user,user.getFriends().get(choose - 2));
                     user.addPrivateChat(user.getFriends().get(choose - 2),privateChat);
                     user.getFriends().get(choose - 2).addPrivateChat(user,privateChat);
                 }
@@ -344,7 +348,7 @@ public class UserThread extends Thread{
     }
 
     private void pChat(PrivateChat pc) throws IOException {
-        pc.startChat(writer,reader,user);
+        pc.startChat(writer,reader,user,fileStream);
     }
 
     private void serverMenu() throws IOException {
@@ -405,7 +409,7 @@ public class UserThread extends Thread{
     }
 
     private void server(DiscordServer server) throws IOException {
-        server.enterMember(user,writer,reader);
+        server.enterMember(user,writer,reader,fileStream);
     }
 
     private void profile() throws IOException {
@@ -612,10 +616,13 @@ public class UserThread extends Thread{
 
     private void picture() throws IOException {
         methodWrite(Command.GETPROFILEPICTURE.getStr());
-        String [] fname = methodRead().split("\\.");
-        File file = new File("./Profs/" + user.getUserName() + "." +fname[fname.length - 1]);
-        fileStream.receiveFile(file);
-        user.setImageFile(file);
+        String input = methodRead();
+        if (!input.equals("#exit")) {
+            String[] fname = input.split("\\.");
+            File file = new File("./ProfilePics/" + user.getUserName() + "." + fname[fname.length - 1]);
+            fileStream.receiveFile(file);
+            user.setImageFile(file);
+        }
     }
 
 

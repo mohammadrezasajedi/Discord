@@ -20,8 +20,8 @@ public class TextChannel extends Channel {
     private HashMap<Massage, File> files;
     private Massage pinnedMessage;
 
-    public TextChannel(FileStream fileStream, String name, DiscordServer discordServer, boolean history) {
-        super(fileStream,name,history);
+    public TextChannel(String name, DiscordServer discordServer, boolean history) {
+        super(name,history);
         this.discordServer = discordServer;
         massages = new HashMap<>();
         observers = new ArrayList<>();
@@ -32,6 +32,7 @@ public class TextChannel extends Channel {
     public void start(Member member,Long history) {
         BufferedReader reader = member.getReader();
         BufferedWriter writer = member.getWriter();
+        FileStream fileStream = member.getFileStream();
         try {
             writer.write(Command.ENTERCHATMODE.getStr());
             writer.newLine();

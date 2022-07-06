@@ -64,7 +64,7 @@ public class Massage implements Serializable {
     public String toString() {
         return "Massage{" +
                 "text='" + text + '\'' +
-                ", author=" + author +
+                ", author=" + author.getUserName() +
                 ", date=" + date +
                 ", id=" + id +
                 ", likes=" + likes +

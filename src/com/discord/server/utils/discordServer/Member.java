@@ -27,15 +27,15 @@ public class Member implements Serializable {
     private transient BufferedReader reader;
     private boolean block;
     private boolean firstTime;
+
     private FileStream fileStream;
-    public Member(FileStream fileStream,User user,DiscordServer discordServer) {
+    public Member(User user,DiscordServer discordServer) {
         this.user = user;
         this.discordServer=discordServer;
         roles=new HashSet<>();
          block=false;
          firstTime = true;
          historyKeeper = new HashMap<>();
-         this.fileStream = fileStream;
     }
 
     public HashSet<String> getRoles() {
@@ -48,6 +48,10 @@ public class Member implements Serializable {
 
     public void setReader(BufferedReader reader) {
         this.reader = reader;
+    }
+
+    public void setFileStream(FileStream fileStream) {
+        this.fileStream = fileStream;
     }
 
     public void start() throws IOException {
@@ -465,11 +469,11 @@ public class Member implements Serializable {
         Channel channel = null;
         switch (choose){
             case 1:{
-                channel = new TextChannel(fileStream,name,discordServer,false);
+                channel = new TextChannel(name,discordServer,false);
                 break;
             }
             case 2:{
-                channel = new VoiceChannel(fileStream,name,discordServer,false);
+                channel = new VoiceChannel(name,discordServer,false);
                 break;
             }
         }
@@ -672,5 +676,9 @@ public class Member implements Serializable {
 
     public BufferedReader getReader() {
         return reader;
+    }
+
+    public FileStream getFileStream() {
+        return fileStream;
     }
 }

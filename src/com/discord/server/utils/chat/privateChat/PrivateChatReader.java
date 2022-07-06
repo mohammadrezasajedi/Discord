@@ -15,15 +15,17 @@ import java.io.Serializable;
 public class PrivateChatReader implements Runnable, Serializable {
     private transient BufferedReader reader;
     private transient PrivateChat privateChat;
-    private FileStream fileStream;
+    private transient PrivateChatWriter writer;
+    private transient FileStream fileStream;
     private User user;
 
 
-    public PrivateChatReader(FileStream fileStream, BufferedReader reader, PrivateChat privateChat, User user) {
+    public PrivateChatReader(FileStream fileStream, BufferedReader reader, PrivateChat privateChat, User user,PrivateChatWriter writer) {
         this.reader = reader;
         this.privateChat = privateChat;
         this.user = user;
         this.fileStream = fileStream;
+        this.writer = writer;
     }
 
     @Override
@@ -33,16 +35,35 @@ public class PrivateChatReader implements Runnable, Serializable {
             while (!str.equals("#exit")){
                 try {
                     if (str.equals("#sendFile")) {
-                        File file = fileStream.receiveFilePChat(privateChat);
-                        str = user.getUserName() + " has sent a file to chat -- #download";
-                        Massage massage = new Massage(str, user, privateChat.getId());
-                        privateChat.sendMassage(massage);
-                        privateChat.getFiles().put(massage, file);
+                        Thread t = new Thread(new Runnable() {
+                            final String name = methodRead();
+                            @Override
+                            public void run() {
+                                File file = new File("./ChatContent/" + user.getUserName() + "_P_" + (privateChat.getHis()) + "_" + name);
+                                fileStream.receiveFile(file);
+                                String s = user.getUserName() + " has sent a file to chat -- #download";
+                                Massage massage = new Massage(s, user, privateChat.getId());
+                                privateChat.sendMassage(massage);
+                                privateChat.getFiles().put(massage, file);
+                            }
+                        });
+                        t.start();
                     } else if (str.contains("#download")) {
                         String[] strings = str.split("-");
                         long id = Long.parseLong(strings[1]);
                         File file = privateChat.getFileMessage(id);
-                        fileStream.sendFile(file);
+                        Thread t = new Thread(() -> {
+                            try {
+                                fileStream.methodWrite(file.getName());
+                                fileStream.sendFile(file);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        });
+                        t.start();
+                    } else if (str.contains("#")) {
+                        str = methodRead();
+                        continue;
                     } else {
                         privateChat.sendMassage(new Massage(str, user, privateChat.getId()));
                     }

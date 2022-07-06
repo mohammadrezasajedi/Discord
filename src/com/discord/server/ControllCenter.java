@@ -130,7 +130,7 @@ public class ControllCenter implements Serializable {
     }
 
     public DiscordServer createServer(FileStream fileStream, String serverName, User owner, String welcome){
-        DiscordServer discordServer=new DiscordServer(fileStream,serverName,owner,this,welcome);
+        DiscordServer discordServer=new DiscordServer(serverName,owner,this,welcome);
         discordServers.put(discordServer.getServerName(),discordServer);
         owner.getDiscordServers().add(discordServer);
         return discordServer;

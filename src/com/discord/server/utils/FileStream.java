@@ -1,17 +1,12 @@
 package com.discord.server.utils;
 
-import com.discord.server.utils.discordServer.Member;
-import com.discord.server.utils.discordServer.channels.TextChannel;
-import com.discord.server.utils.discordServer.channels.VoiceChannel;
-
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 
-public class FileStream implements Serializable{
-    private transient Socket socket;
-    private transient DataOutputStream out;
-    private transient DataInputStream in;
+public class FileStream {
+    private Socket socket;
+    private DataOutputStream out;
+    private DataInputStream in;
 
     public FileStream(Socket socket) throws IOException {
         this.socket = socket;
@@ -19,8 +14,32 @@ public class FileStream implements Serializable{
         out = new DataOutputStream(socket.getOutputStream());
     }
 
-    public void receiveFile (File file) {
+    public synchronized void sendFile (File file) {
         try {
+            if (file != null && file.exists()) {
+                int bytes = 0;
+
+                FileInputStream fileInputStream = new FileInputStream(file);
+                out.writeLong(file.length());
+
+                byte[] buf = new byte[8*1024];
+                while ((bytes=fileInputStream.read(buf))!=-1){
+                    out.write(buf,0,bytes);
+                    out.flush();
+                }
+                fileInputStream.close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public synchronized void receiveFile (File file) {
+        try {
+            if (file.exists()){
+                file.delete();
+            }
+            file.createNewFile();
             int bytes = 0;
             FileOutputStream fileOutputStream = new FileOutputStream(file);
 
@@ -34,5 +53,10 @@ public class FileStream implements Serializable{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void methodWrite (String str) throws IOException {
+        out.writeUTF(str);
+        out.flush();
     }
 }

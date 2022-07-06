@@ -27,8 +27,8 @@ public class VoiceChannel extends Channel{
     private Massage pinnedMessage;
 
 
-    public VoiceChannel(FileStream fileStream, String name, DiscordServer discordServer, boolean history) {
-        super(fileStream,name,history);
+    public VoiceChannel(String name, DiscordServer discordServer, boolean history) {
+        super(name,history);
         this.discordServer = discordServer;
         massages = new HashMap<>();
         observers = new ArrayList<>();
@@ -39,6 +39,7 @@ public class VoiceChannel extends Channel{
     public void start(Member member,Long history) {
         BufferedReader reader = member.getReader();
         BufferedWriter writer = member.getWriter();
+        FileStream fileStream = member.getFileStream();
         try {
             writer.write(Command.ENTERCHATMODE.getStr());
             writer.newLine();

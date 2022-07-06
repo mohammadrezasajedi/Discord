@@ -15,7 +15,6 @@ public class PrivateChat implements Serializable {
     private HashMap<Massage, File> files;
     private transient ArrayList<PrivateChatWriter> observers;
     private  long keepId;
-    private FileStream fileStream;
 
     public void sendMassage(Massage massage){
         massages.put(massage.getId(),massage);
@@ -23,13 +22,12 @@ public class PrivateChat implements Serializable {
         t.start();
     }
 
-    public PrivateChat(User user1, User user2,FileStream fileStream) {
+    public PrivateChat(User user1, User user2) {
         this.user1 = user1;
         this.user2 = user2;
         this.massages = new HashMap<>();
         observers = new ArrayList<>();
         keepId = 0L;
-        this.fileStream = fileStream;
         this.files = new HashMap<>();
     }
 
@@ -49,7 +47,7 @@ public class PrivateChat implements Serializable {
         return user2;
     }
 
-    public void startChat (BufferedWriter writer, BufferedReader reader,User user){
+    public void startChat (BufferedWriter writer, BufferedReader reader,User user,FileStream fileStream){
         try {
             if (observers == null){
                 observers = new ArrayList<>();
@@ -72,7 +70,7 @@ public class PrivateChat implements Serializable {
         for (Long l: massages.keySet()) {
             privateChatWriter.Initbroadcast(massages.get(l));
         }
-        PrivateChatReader privateChatReader = new PrivateChatReader(fileStream,reader,this,user);
+        PrivateChatReader privateChatReader = new PrivateChatReader(fileStream,reader,this,user,privateChatWriter);
         privateChatReader.run();
     }
 

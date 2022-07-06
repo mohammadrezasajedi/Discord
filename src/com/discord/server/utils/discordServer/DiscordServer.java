@@ -50,20 +50,18 @@ public class DiscordServer implements Serializable {
     private HashMap<Member,HashMap<String,Channel>> blockedMembers;
     private HashMap<Member,HashMap<String,Channel>> limitedChannels;
     private String welcome;
-    private FileStream fileStream;
 
-    public DiscordServer(FileStream fileStream,String serverName, User serverOwner,ControllCenter controllCenter,String welcome) {
+    public DiscordServer(String serverName, User serverOwner,ControllCenter controllCenter,String welcome) {
         this.serverName = serverName;
         this.serverOwner = serverOwner;
         this.controllCenter=controllCenter;
         members=new HashMap<>();
-        Member member=new Member(fileStream,serverOwner,this);
+        Member member=new Member(serverOwner,this);
         HashSet<Access> ownerAccess = new HashSet<>();
         ownerAccess.addAll(Arrays.asList(Access.values()));
         member.getRoles().add("Owner");
-        this.fileStream = fileStream;
-        members.put(serverOwner,member);
         userRoles=new HashMap<>();
+        members.put(serverOwner,member);
         roleAccesses = new HashMap<>();
         channels=new HashMap<>();
 
@@ -84,10 +82,11 @@ public class DiscordServer implements Serializable {
         return serverName;
     }
 
-    public void enterMember(User user, BufferedWriter writer, BufferedReader reader) throws IOException {
+    public void enterMember(User user, BufferedWriter writer, BufferedReader reader,FileStream fileStream) throws IOException {
         Member member=members.get(user);
         member.setWriter(writer);
         member.setReader(reader);
+        member.setFileStream(fileStream);
         member.start();
     }
 
@@ -183,7 +182,7 @@ public class DiscordServer implements Serializable {
     public boolean addUser (String userName){
         User user = controllCenter.findUser(userName);
         if (user != null){
-            Member member = new Member(fileStream,user,this);
+            Member member = new Member(user,this);
             member.getRoles().add("User");
             userRoles.put(user,member.getRoles());
             members.put(user,member);

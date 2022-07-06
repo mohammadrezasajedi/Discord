@@ -16,15 +16,13 @@ public abstract class Channel implements Serializable {
     protected boolean limited;
     protected HashMap<Member,ArrayList<Massage>> active;
     protected long keepId;
-    protected FileStream fileStream;
 
-    public Channel(FileStream fileStream,String name,boolean history) {
+    public Channel (String name,boolean history) {
         this.history = history;
         this.name = name;
         active = new HashMap<>();
         keepId = 0L;
         limited = false;
-        this.fileStream = fileStream;
     }
 
     public Long getId () {

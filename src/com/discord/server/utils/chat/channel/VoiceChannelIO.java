@@ -50,18 +50,35 @@ public class VoiceChannelIO implements Runnable, Serializable {
                     } else if (str.contains("#getpm")){
                         voiceChannel.getPinned(this);
                     } else if (str.equals("#sendFile")){
-//                        File file = fileStream.receiveFile(voiceChannel,member);
-//                        if (file != null) {
-//                            str = member.getUser().getUserName() + " has sent a file to chat -- #download";
-//                            Massage massage = new Massage(str, member.getUser(), voiceChannel.getId());
-//                            voiceChannel.sendMassage(massage);
-//                            voiceChannel.getFiles().put(massage, file);
-//                        }
+                        Thread t = new Thread(new Runnable() {
+                            final String name = methodRead();
+                            @Override
+                            public void run() {
+                                File file = new File("./ChatContent/" + member.getUser().getUserName() + "_T_" + (voiceChannel.getHistory()) + "_" + name);
+                                fileStream.receiveFile(file);
+                                String s = member.getUser().getUserName() + " has sent a file to chat -- #download";
+                                Massage massage = new Massage(s, member.getUser(), voiceChannel.getId());
+                                voiceChannel.sendMassage(massage);
+                                voiceChannel.getFiles().put(massage, file);
+                            }
+                        });
+                        t.start();
                     } else if (str.contains("#download")){
-//                        String[] strings = str.split("-");
-//                        long id = Long.parseLong(strings[1]);
-//                        File file = voiceChannel.getFileMessage(id);
-//                        fileStream.sendFile(file);
+                        String[] strings = str.split("-");
+                        long id = Long.parseLong(strings[1]);
+                        File file = voiceChannel.getFileMessage(id);
+                        Thread t = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    fileStream.methodWrite(file.getName());
+                                    fileStream.sendFile(file);
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        });
+                        t.start();
                     }
                 } catch (NumberFormatException | WrongFormatException | ArrayIndexOutOfBoundsException e){
                     System.err.println(member.getUser().getUserName() + " sent an unacceptable command");

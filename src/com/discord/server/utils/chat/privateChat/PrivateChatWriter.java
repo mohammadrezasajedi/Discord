@@ -49,7 +49,7 @@ public class PrivateChatWriter implements Serializable {
         }
     }
 
-    private void methodWrite (String str) throws IOException {
+    public void methodWrite (String str) throws IOException {
         writer.write(str);
         writer.newLine();
         writer.flush();

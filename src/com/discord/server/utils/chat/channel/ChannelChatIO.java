@@ -50,16 +50,16 @@ public class ChannelChatIO implements Runnable, Serializable {
                     } else if (str.contains("#getpm")){
                         textChannel.getPinned(this);
                     } else if (str.equals("#sendFile")){
-                        File file = fileStream.receiveFile(textChannel,member);
-                        str = member.getUser().getUserName() +  " has sent a file to chat -- #download";
-                        Massage massage =new Massage(str,member.getUser(),textChannel.getId());
-                        textChannel.sendMassage(massage);
-                        textChannel.getFiles().put(massage,file);
+//                        File file = fileStream.receiveFile(textChannel,member);
+//                        str = member.getUser().getUserName() +  " has sent a file to chat -- #download";
+//                        Massage massage =new Massage(str,member.getUser(),textChannel.getId());
+//                        textChannel.sendMassage(massage);
+//                        textChannel.getFiles().put(massage,file);
                     } else if (str.contains("#download")){
-                        String[] strings = str.split("-");
-                        long id = Long.parseLong(strings[1]);
-                        File file = textChannel.getFileMessage(id);
-                        fileStream.sendFile(file);
+//                        String[] strings = str.split("-");
+//                        long id = Long.parseLong(strings[1]);
+//                        File file = textChannel.getFileMessage(id);
+//                        fileStream.sendFile(file);
                     }
                     else {
                         textChannel.sendMassage(new Massage(str,member.getUser(),textChannel.getId()));
@@ -77,9 +77,7 @@ public class ChannelChatIO implements Runnable, Serializable {
 
     public void broadcast (Massage massage) {
         try {
-            if (!massage.getAuthor().equals(member.getUser())) {
-                methodWrite(massage.toString());
-            }
+            methodWrite(massage.toString());
         } catch (IOException e){
             System.err.println("Couldn't Send Message");
         }

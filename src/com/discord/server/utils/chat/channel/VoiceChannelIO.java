@@ -50,13 +50,13 @@ public class VoiceChannelIO implements Runnable, Serializable {
                     } else if (str.contains("#getpm")){
                         voiceChannel.getPinned(this);
                     } else if (str.equals("#sendFile")){
-                        File file = fileStream.receiveFile(voiceChannel,member);
-                        if (file != null) {
-                            str = member.getUser().getUserName() + " has sent a file to chat -- #download";
-                            Massage massage = new Massage(str, member.getUser(), voiceChannel.getId());
-                            voiceChannel.sendMassage(massage);
-                            voiceChannel.getFiles().put(massage, file);
-                        }
+//                        File file = fileStream.receiveFile(voiceChannel,member);
+//                        if (file != null) {
+//                            str = member.getUser().getUserName() + " has sent a file to chat -- #download";
+//                            Massage massage = new Massage(str, member.getUser(), voiceChannel.getId());
+//                            voiceChannel.sendMassage(massage);
+//                            voiceChannel.getFiles().put(massage, file);
+//                        }
                     } else if (str.contains("#download")){
                         String[] strings = str.split("-");
                         long id = Long.parseLong(strings[1]);
@@ -76,9 +76,7 @@ public class VoiceChannelIO implements Runnable, Serializable {
 
     public void broadcast (Massage massage) {
         try {
-            if (!massage.getAuthor().equals(member.getUser())) {
-                methodWrite(massage.toString());
-            }
+            methodWrite(massage.toString());
         } catch (IOException e){
             System.err.println("Couldn't Send Message");
         }

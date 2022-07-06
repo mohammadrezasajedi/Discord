@@ -12,9 +12,6 @@ public class NotificationStream {
     public NotificationStream(Socket socket) throws IOException {
         this.socket = socket;
         out = new ObjectOutputStream(socket.getOutputStream());
-//        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-//        writer.write("created");
-//        writer.flush();
     }
 
     public void sendPopUp (String title,String desc){

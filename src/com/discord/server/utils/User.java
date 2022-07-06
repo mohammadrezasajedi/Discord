@@ -13,7 +13,7 @@ public class User implements Serializable {
     public enum Status{
         ONLINE("Online"),
         IDLE("Idle"),
-        DND("Do Not Disturb"),
+            DND("Do Not Disturb"),
         INVISIBLE("Invisible"),
         OFFLINE("offline");
 

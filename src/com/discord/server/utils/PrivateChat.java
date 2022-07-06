@@ -51,6 +51,9 @@ public class PrivateChat implements Serializable {
 
     public void startChat (BufferedWriter writer, BufferedReader reader,User user){
         try {
+            if (observers == null){
+                observers = new ArrayList<>();
+            }
             writer.write(Command.ENTERCHATMODE.getStr());
             writer.newLine();
             writer.flush();
@@ -60,6 +63,7 @@ public class PrivateChat implements Serializable {
             writer.write(u.getUserName());
             writer.newLine();
             writer.flush();
+
         } catch (IOException e) {
             Thread.currentThread().interrupt();
         }

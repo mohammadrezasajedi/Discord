@@ -50,11 +50,12 @@ public class Server {
                 ServerSocket serverSocket = new ServerSocket(8989);
                 ServerSocket fileSocket = new ServerSocket(8888);
                 ServerSocket notifSocket = new ServerSocket(8787);
-                controllCenter.setFileSocket(fileSocket);
+
                 while (true) {
                     Socket socket = serverSocket.accept();
                     Socket notif = notifSocket.accept();
-                    controllCenter.init(socket,notif);
+                    Socket fileS = fileSocket.accept();
+                    controllCenter.init(socket,notif,fileS);
                     System.out.println("User connected");
                 }
             }

@@ -22,7 +22,6 @@ public class ControllCenter implements Serializable {
     private HashMap<String,DiscordServer> discordServers;
     private transient ArrayList<UserThread> threads;
     private transient ExecutorService pool;
-    private transient ServerSocket fileSocket;
 
     public ControllCenter() throws IOException {
         users=new HashMap<>();
@@ -31,17 +30,13 @@ public class ControllCenter implements Serializable {
         pool= Executors.newCachedThreadPool();
     }
 
-    public void setFileSocket(ServerSocket fileSocket) {
-        this.fileSocket = fileSocket;
-    }
-
     public ControllCenter(ControllCenter controllCenter){
         users=controllCenter.users;
         discordServers=controllCenter.discordServers;
         threads=new ArrayList<>();
         pool=Executors.newCachedThreadPool();
     }
-    public void init(Socket socket,Socket notifSocket) throws IOException {
+    public void init(Socket socket,Socket notifSocket,Socket fileSocket) throws IOException {
         try {
             UserThread userThread=new UserThread(fileSocket,this,socket,notifSocket);
             threads.add(userThread);

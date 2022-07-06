@@ -28,7 +28,7 @@ public class UserThread extends Thread{
 
     private transient NotificationStream notificationStream;
 
-    public UserThread(ServerSocket fileserverSocket, ControllCenter controllCenter, Socket socket,Socket notifSocket) throws IOException {
+    public UserThread(Socket fileserverSocket, ControllCenter controllCenter, Socket socket,Socket notifSocket) throws IOException {
         this.controllCenter = controllCenter;
         this.socket = socket;
         writer=new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -58,9 +58,7 @@ public class UserThread extends Thread{
                     break;
                 }
 
-                fileStream.setUser(user);
-
-                if (user.getStatus() == User.Status.OFFLINE) {
+                if (user != null && user.getStatus() == User.Status.OFFLINE) {
                     user.setStatus(User.Status.ONLINE);
                 }
 
@@ -614,8 +612,13 @@ public class UserThread extends Thread{
 
     private void picture() throws IOException {
         methodWrite(Command.GETPROFILEPICTURE.getStr());
-        File file = fileStream.receiveFile();
-        user.setImageFile(file);
+        String input = methodRead();
+        if (!methodRead().equals("#exit")) {
+            String[] fname = input.split("\\.");
+            File file = new File("./Profs/" + user.getUserName() + "." + fname[fname.length - 1]);
+            fileStream.receiveFile(file);
+            user.setImageFile(file);
+        }
     }
 
 

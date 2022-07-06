@@ -62,6 +62,11 @@ public class Member implements Serializable {
                     historyKeeper.put(c, 0L);
                 }
             }
+            try {
+                Thread.sleep(5 * 1000);
+            } catch (InterruptedException e){
+                e.printStackTrace();
+            }
         }
         try {
             Thread.sleep(5 * 1000);

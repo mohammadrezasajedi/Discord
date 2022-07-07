@@ -29,6 +29,22 @@ public class User implements Serializable {
 
     }
 
+    public enum Reqs{
+        ACCEPTED("Accepted"),
+        REJECTED("Rejected"),
+        PENDING("Pending");
+
+        private String str;
+
+        Reqs(String str) {
+            this.str = str;
+        }
+
+        public String getStr() {
+            return str;
+        }
+    }
+
     private String userName;
     private String password;
     private String email;
@@ -36,6 +52,7 @@ public class User implements Serializable {
     private File imageFile;
     private Status status;
     private ArrayList<User> requests;
+    private HashMap<User,Reqs> sendedReqs;
     private ArrayList<User> friends;
     private HashMap<String,PrivateChat> privateChats;
     private ArrayList<User> blockUsers;
@@ -50,6 +67,8 @@ public class User implements Serializable {
         friends=new ArrayList<>();
         privateChats=new HashMap<>();
         discordServers=new ArrayList<>();
+        sendedReqs = new HashMap<>();
+        blockUsers = new ArrayList<>();
         status = Status.ONLINE;
     }
 
@@ -108,6 +127,18 @@ public class User implements Serializable {
 
     public void addPrivateChat (User user, PrivateChat privateChat){
         privateChats.put(user.getUserName(),privateChat);
+    }
+
+    public void sendRequest (User user){
+        sendedReqs.put(user,Reqs.PENDING);
+    }
+
+    public void answerReq (User user,Reqs ans){
+        sendedReqs.replace(user,ans);
+    }
+
+    public HashMap<User, Reqs> getSendedReqs() {
+        return sendedReqs;
     }
 
     public void removePrivateChat(User user){

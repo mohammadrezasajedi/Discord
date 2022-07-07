@@ -145,5 +145,7 @@ public class ControllCenter implements Serializable {
         discordServers.remove(discordServer.getServerName());
     }
 
-
+    public HashMap<String, User> getUsers() {
+        return users;
+    }
 }

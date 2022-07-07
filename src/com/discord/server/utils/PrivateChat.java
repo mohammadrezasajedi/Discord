@@ -62,6 +62,18 @@ public class PrivateChat implements Serializable {
             writer.newLine();
             writer.flush();
 
+            if (u.getImageFile() != null){
+                writer.write("pic");
+                writer.newLine();
+                writer.flush();
+                fileStream.methodWrite(u.getImageFile().getName());
+                fileStream.sendFile(u.getImageFile());
+            } else {
+                writer.write("null");
+                writer.newLine();
+                writer.flush();
+            }
+
         } catch (IOException e) {
             Thread.currentThread().interrupt();
         }

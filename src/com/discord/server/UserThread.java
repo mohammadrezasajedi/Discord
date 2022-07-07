@@ -15,6 +15,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class UserThread extends Thread{
@@ -65,8 +66,9 @@ public class UserThread extends Thread{
                     user.setStatus(User.Status.ONLINE);
                 }
 
-
-                notificationStream.sendPopUp("WellCome",user.getUserName());
+                if (user != null && notificationStream != null) {
+                    notificationStream.sendPopUp("WellCome", user.getUserName());
+                }
 
 
                 boolean loop = true;
@@ -114,7 +116,7 @@ public class UserThread extends Thread{
     private void fMenu() throws IOException {
         boolean loop = true;
         while (loop) {
-            int choose = showMenu("1.exit\n2.create new friend\n3.show friends\n4.friend requests", 4);
+            int choose = showMenu("1.exit\n2.create new friend\n3.show friends\n4.friend requests\n5.Requests status\n6.Block Users\n7.Unblock Users", 7);
             switch (choose) {
                 case 1: {
                     loop=false;
@@ -132,7 +134,53 @@ public class UserThread extends Thread{
                     friendRequest();
                     break;
                 }
+                case 5: {
+                    reqs();
+                    break;
+                }
+                case 6: {
+                    blockFriends();
+                    break;
+                }
+                case 7: {
+                    unBlockFriends();
+                    break;
+                }
             }
+        }
+    }
+
+    private void reqs() throws IOException {
+        methodWrite(Command.GETTABLE.getStr());
+        methodWrite(String.valueOf(user.getSendedReqs().size()));
+        methodWrite("reqs");
+        for (User u:user.getSendedReqs().keySet()) {
+            methodWrite(u.getUserName()+" : "+user.getSendedReqs().get(u).getStr());
+            if (u.getImageFile() != null){
+                methodWrite("pic");
+                fileStream.methodWrite(u.getImageFile().getName());
+                fileStream.sendFile(u.getImageFile());
+            } else {
+                methodWrite("null");
+            }
+        }
+        String str = methodRead();
+        while (!str.equals("exit")){
+            HashMap<User,User.Reqs> reqs = user.getSendedReqs();
+            User is = null;
+            for (User u : reqs.keySet()) {
+                if (u.getUserName().equals(str)){
+                    if (reqs.get(u).equals(User.Reqs.PENDING)) {
+                        u.getRequests().remove(user);
+                        is = u;
+                        break;
+                    }
+                }
+            }
+            if (is != null){
+                user.getSendedReqs().remove(is);
+            }
+            str = methodRead();
         }
     }
 
@@ -146,7 +194,11 @@ public class UserThread extends Thread{
         }else {
             if (user.getRequests().contains(this.user)){
                 str = "You already have a pending request";
-            }else {
+            } else if (user.equals(this.user) || this.user.getFriends().contains(user)){
+                str = "You can't send user request to this user";
+            }
+            else {
+                this.user.sendRequest(user);
                 user.addRequest(this.user);
                 str="Your Friend Request has been sent.";
             }
@@ -155,12 +207,164 @@ public class UserThread extends Thread{
     }
 
     private void showFriends() throws IOException {
-        methodWrite(Command.GETTABLE.getStr());
-        methodWrite(String.valueOf(user.getFriends().size()));
+        methodWrite(Command.SHOWFRIENDSCHART_ONLINE.getStr());
+        int i = 0;
         for (User u:user.getFriends()) {
-            methodWrite(u.getUserName()+" : "+u.getStatus().getName());
+            if (u.getStatus().equals(User.Status.ONLINE)) {
+                i++;
+            }
         }
-        methodRead();
+        methodWrite(String.valueOf(i));
+        for (User u:user.getFriends()) {
+            if (u.getStatus().equals(User.Status.ONLINE)) {
+                methodWrite(u.getUserName() + " : " + u.getStatus().getName());
+                if (u.getImageFile() != null){
+                    methodWrite("pic");
+                    fileStream.methodWrite(u.getImageFile().getName());
+                    fileStream.sendFile(u.getImageFile());
+                } else {
+                    methodWrite("null");
+                }
+            }
+        }
+
+        String str = methodRead();
+        while (!str.equals("exit")){
+            switch (str) {
+                case "Online" : {
+                    methodWrite(Command.SHOWFRIENDSCHART_ONLINE.getStr());
+                    i = 0;
+                    for (User u:user.getFriends()) {
+                        if (u.getStatus().equals(User.Status.ONLINE)) {
+                            i++;
+                        }
+                    }
+                    methodWrite(String.valueOf(i));
+                    for (User u:user.getFriends()) {
+                        if (u.getStatus().equals(User.Status.ONLINE)) {
+                            methodWrite(u.getUserName() + " : " + u.getStatus().getName());
+                            if (u.getImageFile() != null){
+                                methodWrite("pic");
+                                fileStream.methodWrite(u.getImageFile().getName());
+                                fileStream.sendFile(u.getImageFile());
+                            } else {
+                                methodWrite("null");
+                            }
+                        }
+                    }
+
+                    str = methodRead();
+                    break;
+                }
+                case "All" : {
+                    methodWrite(Command.SHOWFRIENDSCHART_ALL.getStr());
+                    methodWrite(String.valueOf(user.getFriends().size()));
+                    for (User u:user.getFriends()) {
+                        methodWrite(u.getUserName() + " : " + u.getStatus().getName());
+                        if (u.getImageFile() != null){
+                            methodWrite("pic");
+                            fileStream.methodWrite(u.getImageFile().getName());
+                            fileStream.sendFile(u.getImageFile());
+                        } else {
+                            methodWrite("null");
+                        }
+                    }
+
+                    str = methodRead();
+                    break;
+                }
+                case "Pending" : {
+                    methodWrite(Command.SHOWFRIENDSCHART_PENDING.getStr());
+                    methodWrite(String.valueOf(user.getRequests().size()));
+                    for (User u:user.getRequests()) {
+                        methodWrite(u.getUserName() + " : " + u.getStatus().getName());
+                        if (u.getImageFile() != null){
+                            methodWrite("pic");
+                            fileStream.methodWrite(u.getImageFile().getName());
+                            fileStream.sendFile(u.getImageFile());
+                        } else {
+                            methodWrite("null");
+                        }
+                    }
+
+                    str = methodRead();
+                    break;
+                }
+                case "Blocked" : {
+                    methodWrite(Command.SHOWFRIENDSCHART_BLOCKED.getStr());
+                    methodWrite(String.valueOf(user.getBlockUsers().size()));
+                    for (User u:user.getBlockUsers()) {
+                        methodWrite(u.getUserName() + " : " + u.getStatus().getName());
+                        if (u.getImageFile() != null){
+                            methodWrite("pic");
+                            fileStream.methodWrite(u.getImageFile().getName());
+                            fileStream.sendFile(u.getImageFile());
+                        } else {
+                            methodWrite("null");
+                        }
+                    }
+
+                    str = methodRead();
+                    break;
+                }
+            }
+        }
+    }
+
+    private void unBlockFriends() throws IOException {
+        boolean loop=true;
+        while (loop){
+            StringBuilder sb=new StringBuilder();
+            sb.append("1.exit\n");
+            int index=2;
+            for (User u:user.getBlockUsers()) {
+                sb.append(index++);
+                sb.append('.');
+                sb.append(u.getUserName());
+                sb.append("\n");
+            }
+            int choose=showMenu(sb.toString(),index - 1);
+            if (choose==1){
+                loop=false;
+            }else {
+                User u = user.getBlockUsers().get(choose - 2);
+                int choice=showMenu("1.YES\n2.NO",2);
+                if (choice==1){
+                    user.removeBlockUser(u);
+                    notificationStream.sendPopUp("User UnBlocked",u.getUserName() + " has been successfully unblocked");
+                }
+            }
+        }
+    }
+
+    private void blockFriends() throws IOException {
+        boolean loop=true;
+        ArrayList<User> ubs = new ArrayList<>();
+        while (loop){
+            StringBuilder sb=new StringBuilder();
+            sb.append("1.exit\n");
+            int index=2;
+            for (User u:user.getFriends()) {
+                if (!user.getBlockUsers().contains(u)) {
+                    sb.append(index++);
+                    sb.append('.');
+                    sb.append(u.getUserName());
+                    sb.append("\n");
+                    ubs.add(u);
+                }
+            }
+            int choose=showMenu(sb.toString(),index - 1);
+            if (choose==1){
+                loop=false;
+            }else {
+                User u = ubs.get(choose - 2);
+                int choice=showMenu("1.YES\n2.NO",2);
+                if (choice==1){
+                    user.addBlockUser(u);
+                    notificationStream.sendPopUp("User Blocked",u.getUserName() + " has been successfully blocked");
+                }
+            }
+        }
     }
     private void friendRequest() throws IOException {
         boolean loop=true;
@@ -179,12 +383,13 @@ public class UserThread extends Thread{
                 loop=false;
             }else {
                 User u = user.getRequests().get(choose - 2);
-//                methodWrite(Command.PRINT.getStr());
-//                methodWrite("Accept " + u.getUserName() + "?");
                 int choice=showMenu("1.YES\n2.NO",2);
                 if (choice==1){
                     u.addFriend(user);
                     user.addFriend(u);
+                    u.answerReq(user, User.Reqs.ACCEPTED);
+                } else {
+                    u.answerReq(user, User.Reqs.REJECTED);
                 }
                 user.getRequests().remove(u);
             }
@@ -292,19 +497,21 @@ public class UserThread extends Thread{
         boolean loop = true;
         ArrayList<String> pc = new ArrayList<String>();
         pc.addAll(user.getPrivateChats().keySet());
-
+        ArrayList<PrivateChat> pcs= new ArrayList<>();
         while (loop) {
-            int num = 2 + pc.size();
             StringBuilder sb = new StringBuilder("1.exit\n2.create new chat\n");
             int i = 3;
             for (String p : pc) {
-                sb.append(i++);
-                sb.append('.');
-                sb.append(p);
-                sb.append("\n");
+                if (!controllCenter.getUsers().get(p).getBlockUsers().contains(user)) {
+                    sb.append(i++);
+                    sb.append('.');
+                    sb.append(p);
+                    sb.append("\n");
+                    pcs.add(user.getPrivateChats().get(p));
+                }
             }
 
-            int choose = showMenu(sb.toString(),num);
+            int choose = showMenu(sb.toString(),i - 1);
 
             switch (choose){
                 case (1): {
@@ -315,7 +522,7 @@ public class UserThread extends Thread{
                     break;
                 }
                 default:{
-                    pChat(user.getPrivateChats().get(pc.get(choose - 3)));
+                    pChat(pcs.get(choose - 3));
                     break;
                 }
             }
@@ -330,7 +537,9 @@ public class UserThread extends Thread{
             sb.append("1.exit\n");
             int i=2;
             for (User u:user.getFriends()) {
-                sb.append(i++).append('.').append(u.getUserName()).append("\n");
+                if (!u.getBlockUsers().contains(user)) {
+                    sb.append(i++).append('.').append(u.getUserName()).append("\n");
+                }
             }
             int choose = showMenu(sb.toString(),i - 1);
 
@@ -415,7 +624,22 @@ public class UserThread extends Thread{
     private void profile() throws IOException {
         boolean loop = true;
         while (loop){
-            int choose = showMenu("1.user name\n2.password\n3.e-mail\n4.phone\n5.status\n6.picture\n7.exit\n",7);
+            methodWrite(Command.PROFILEPAGE.getStr());
+
+            methodWrite(user.getUserName());
+            methodWrite(user.getEmail());
+            methodWrite((user.getPhoneNumber() != null && !user.getPhoneNumber().isEmpty())? user.getPhoneNumber() : "No Phone Number");
+            methodWrite(user.getStatus().getName());
+            if (user.getImageFile() != null){
+                methodWrite("pic");
+                fileStream.methodWrite(user.getImageFile().getName());
+                fileStream.sendFile(user.getImageFile());
+            } else {
+                methodWrite("null");
+            }
+
+            int choose = Integer.parseInt(methodRead());
+
             switch (choose) {
                 case 1 :{
                     userName();
@@ -452,8 +676,6 @@ public class UserThread extends Thread{
     private void userName () throws IOException {
         boolean loop = true;
         while (loop) {
-//            methodWrite(Command.PRINT.getStr());
-//            methodWrite(user.getUserName());
             int choose = showMenu("1.change\n2.exit",2);
 
             switch (choose){
@@ -517,8 +739,6 @@ public class UserThread extends Thread{
     private void email() throws IOException {
         boolean loop = true;
         while (loop){
-//            methodWrite(Command.PRINT.getStr());
-//            methodWrite(user.getEmail());
             int choose = showMenu("1.change\n2.exit\n",2);
             switch (choose){
                 case 1:{
@@ -552,8 +772,6 @@ public class UserThread extends Thread{
         boolean loop = true;
         while (loop){
             if (user.getPhoneNumber()!=null){
-//                methodWrite(Command.PRINT.getStr());
-//                methodWrite(user.getPhoneNumber());
             }
             int choose = showMenu("1.change\n2.remove\n3.exit\n",3);
             switch (choose){
@@ -572,10 +790,14 @@ public class UserThread extends Thread{
                         }
                     }
                     user.setPhoneNumber(phone);
+                    break;
                 }
 
                 case 2: {
                     user.setPhoneNumber(null);
+                    notificationStream.sendPopUp("Phone Number","Your Phone Number has been Deleted Successfully");
+                    loop = false;
+                    break;
                 }
                 case 3:{
                     loop = false;
@@ -589,8 +811,6 @@ public class UserThread extends Thread{
     private void status() throws IOException {
         boolean loop = true;
         while (loop){
-//            methodWrite(Command.PRINT.getStr());
-//            methodWrite(user.getStatus().getName());
             int choose = showMenu("1.change\n2.exit\n",2);
             switch (choose){
                 case 1: {
@@ -616,6 +836,13 @@ public class UserThread extends Thread{
 
     private void picture() throws IOException {
         methodWrite(Command.GETPROFILEPICTURE.getStr());
+        if (user.getImageFile() != null){
+            methodWrite("pic");
+            fileStream.methodWrite(user.getImageFile().getName());
+            fileStream.sendFile(user.getImageFile());
+        } else {
+            methodWrite("null");
+        }
         String input = methodRead();
         if (!input.equals("#exit")) {
             String[] fname = input.split("\\.");

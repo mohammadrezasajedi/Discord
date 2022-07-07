@@ -117,8 +117,16 @@ public class Member implements Serializable {
     private void showMembers () throws IOException {
         methodWrite(Command.GETTABLE.getStr());
         methodWrite(String.valueOf(discordServer.getMembers().size()));
+        methodWrite("mems");
         for (User u:discordServer.getMembers().keySet()) {
             methodWrite(u.getUserName()+" : "+u.getStatus().getName());
+            if (u.getImageFile() != null){
+                methodWrite("pic");
+                fileStream.methodWrite(u.getImageFile().getName());
+                fileStream.sendFile(u.getImageFile());
+            } else {
+                methodWrite("null");
+            }
         }
         methodRead();
     }

@@ -44,6 +44,15 @@ public class VoiceChannel extends Channel{
             writer.write(Command.ENTERCHATMODE.getStr());
             writer.newLine();
             writer.flush();
+
+            writer.write(getName());
+            writer.newLine();
+            writer.flush();
+
+            writer.write("null");
+            writer.newLine();
+            writer.flush();
+
         } catch (IOException e) {
             Thread.currentThread().interrupt();
         }

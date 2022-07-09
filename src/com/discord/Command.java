@@ -30,6 +30,8 @@ public enum Command{
     SHOWFRIENDSCHART_PENDING("ShowFriendsChart_Pending"),
     SHOWFRIENDSCHART_BLOCKED("ShowFriendsChart_Blocked"),
     PROFILEPAGE("ProfilePage"),
+    SIGNUP("SignUp"),
+    LOGIN("login"),
     EXIT("exit")
     ;
 

@@ -20,7 +20,7 @@ public class NotificationStream {
             methodWrite(title);
             methodWrite(desc);
         } catch (IOException e){
-            e.printStackTrace();
+            System.err.println("User stream closed.");
         }
     }
 

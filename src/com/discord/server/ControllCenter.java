@@ -48,8 +48,8 @@ public class ControllCenter implements Serializable {
 
     }
 
-    public User createUser(String userName,String password,String email){
-        User user=new User(userName,password,email,null,null);
+    public User createUser(String userName,String password,String email,String phone){
+        User user=new User(userName,password,email,phone,null);
         users.put(user.getUserName(),user);
         return user;
     }

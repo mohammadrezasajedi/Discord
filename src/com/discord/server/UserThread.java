@@ -48,19 +48,8 @@ public class UserThread extends Thread{
             methodWrite("Welcome to discord.\n");
             Thread.sleep(5*1000);
             while (app) {
-                int choose = showMenu("1.Login\n2.Signup\n3.exit", 3);
-                if (choose == 1) {
-                    login();
-                    if (user == null){
-                        exit();
-                    }
-                } else if (choose == 2){
-                    signUp();
-                } else {
-                    app = false;
-                    exit();
-                    break;
-                }
+                login();
+
 
                 if (user != null && user.getStatus() == User.Status.OFFLINE) {
                     user.setStatus(User.Status.ONLINE);
@@ -72,7 +61,7 @@ public class UserThread extends Thread{
 
 
                 boolean loop = true;
-
+                int choose ;
                 while (loop) {
                     choose = showMenu("1.Friends\n2.Private chat\n3.Discord servers\n4.Profile\n5.logout", 5);
 
@@ -404,89 +393,79 @@ public class UserThread extends Thread{
         String userName = null;
         String password = null;
         String email = null;
+        String phone=null;
+
+        while (loop){
+            methodWrite(Command.SIGNUP.getStr());
+            String str=methodRead();
+            switch (str){
+                case "Info":{
+                    try {
+                        userName=methodRead();
+                        password=methodRead();
+                        email=methodRead();
+                        phone=methodRead();
+                        if (controllCenter.checkUserName(userName) && controllCenter.checkPassword(password) && controllCenter.checkEmail(email)){
+                            if (!(phone.equals("NO PHONE NUMBER"))){
+                                controllCenter.checkPhone(phone);
+                                user=controllCenter.createUser(userName,password,email,phone);
+                            }else {
+                                user = controllCenter.createUser(userName, password, email,null);
+                            }
+                            loop=false;
+                        }
+                    } catch (DuplicateException | WrongFormatException e) {
+                        notificationStream.sendPopUp("ERROR",e.toString());
+                    }
+                    break;
+                }
+                case "login":{
+                    loop=false;
+                    break;
+                }
+            }
+        }
 
         methodWrite(Command.GETUSERNAME.getStr());
-
-        while (loop) {
-            try {
-                userName = reader.readLine();
-                loop = !controllCenter.checkUserName(userName);
-            } catch (DuplicateException | WrongFormatException e) {
-                methodWrite(Command.GETUSERNAMEAGAIN.getStr());
-                methodWrite(e.toString());
-                loop = true;
-            }
-        }
-
-        loop=true;
-        methodWrite(Command.GETPASSWORD.getStr());
-
-
-        while (loop) {
-            try {
-                password = reader.readLine();
-                loop = !controllCenter.checkPassword(password);
-            } catch (WrongFormatException e) {
-                methodWrite(Command.GETPASSWORDAGAIN.getStr());
-
-
-                methodWrite(e.toString());
-
-
-                loop = true;
-            }
-        }
-
-        loop=true;
-        methodWrite(Command.GETEMAIL.getStr());
-
-
-        while (loop) {
-            try {
-                email = reader.readLine();
-                loop = !controllCenter.checkEmail(email);
-            } catch (WrongFormatException e) {
-                methodWrite(Command.GETEMAILAGAIN.getStr());
-
-
-                methodWrite(e.toString());
-
-
-                loop = true;
-            }
-        }
-
-        user=controllCenter.createUser(userName,password,email);
     }
 
     private void login() throws IOException {
         boolean loop=true;
         String userName;
         String password;
-        int count = 0;
-        while (loop && (count < 3)){
+        while (loop){
             try {
-                methodWrite(Command.GETUSERNAME.getStr());
-                userName=methodRead();
-                methodWrite(Command.GETPASSWORD.getStr());
-                password=methodRead();
-                user=controllCenter.findUser(userName,password);
-                if (user!=null){
-                    loop=false;
-                }else {
-                    notificationStream.sendPopUp("Login Failed","Your user name or password is not valid");
-                    methodWrite(Command.RESETMENU.getStr());
-                    loop=true;
-                    count++;
+                methodWrite(Command.LOGIN.getStr());
+                String str;
+                str=methodRead();
+
+                switch (str){
+                    case "Info":{
+                        userName=methodRead();
+                        password=methodRead();
+
+                        user = controllCenter.findUser(userName,password);
+                        if (user!=null){
+                            loop=false;
+                            notificationStream.sendPopUp("Logged in",user.getUserName() + " is logged in");
+                        }else {
+                            notificationStream.sendPopUp("ERROR","User name or Password is incorrect");
+                        }
+                        break;
+                    }
+                    case "SignUp" :{
+                        signUp();
+                        break;
+                    }
+                    case "exit" : {
+                        exit();
+                        loop=false;
+                        break;
+                    }
                 }
             }catch (IOException e){
                 e.printStackTrace();
                 loop=false;
-                count++;
-            }
-            if(count == 3) {
-                methodWrite(Command.EXIT.getStr());
-                Thread.currentThread().interrupt();
             }
         }
 

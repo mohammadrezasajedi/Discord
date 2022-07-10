@@ -59,6 +59,9 @@ public class UserThread extends Thread{
                     notificationStream.sendPopUp("WellCome", user.getUserName());
                 }
 
+                if (user!=null){
+                    user.setUserThread(this);
+                }
 
                 boolean loop = true;
                 int choose ;
@@ -97,6 +100,9 @@ public class UserThread extends Thread{
                 user.setStatus(User.Status.OFFLINE);
             }
             notificationStream.close();
+            if (user!=null){
+                user.setUserThread(null);
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -837,6 +843,7 @@ public class UserThread extends Thread{
         if (user.getStatus()== User.Status.ONLINE){
             user.setStatus(User.Status.OFFLINE);
         }
+        user.setUserThread(null);
         System.out.println(user.getUserName() + " Logged Out.");
     }
 
@@ -884,5 +891,9 @@ public class UserThread extends Thread{
         writer.write(str);
         writer.newLine();
         writer.flush();
+    }
+
+    public void sendPopUp(String title, String description){
+        notificationStream.sendPopUp(title,description);
     }
 }

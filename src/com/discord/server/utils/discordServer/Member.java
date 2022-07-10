@@ -80,7 +80,14 @@ public class Member implements Serializable {
                 int num=3+channels.size();
                 int i=4;
                 for (Channel channel:channels) {
-                    sb.append(i++).append(".").append(channel.getName()).append("\n");
+                    sb.append(i++).append(".").append(channel.getName());
+
+                    if (channel instanceof TextChannel){
+                        if (((TextChannel)channel).getTags().get(this)!=0){
+                            sb.append(":").append(((TextChannel) channel).getTags().get(this));
+                        }
+                    }
+                    sb.append("\n");
                     if (!historyKeeper.containsKey(channel)){
                         historyKeeper.put(channel,0L);
                     }

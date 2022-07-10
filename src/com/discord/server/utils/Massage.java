@@ -24,7 +24,7 @@ public class Massage implements Serializable {
     private ArrayList<User> dislikes;
     private ArrayList<User> laughters;
     public Massage(String text, User author,long id) {
-        this.text = text;
+        this.text = text.replace(",","");
         this.author = author;
         this.date = LocalDate.now();
         this.id= id;

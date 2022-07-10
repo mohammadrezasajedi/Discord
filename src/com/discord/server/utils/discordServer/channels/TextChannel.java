@@ -14,6 +14,7 @@ import java.io.*;
 import java.util.*;
 
 public class TextChannel extends Channel {
+    private HashMap<Member,Integer> tags;
     private DiscordServer discordServer;
     private ArrayList<ChannelChatIO> observers;
     private HashMap<Long, Massage> massages;
@@ -22,10 +23,16 @@ public class TextChannel extends Channel {
 
     public TextChannel(String name, DiscordServer discordServer, boolean history) {
         super(name,history);
+
         this.discordServer = discordServer;
         massages = new HashMap<>();
         observers = new ArrayList<>();
         files = new HashMap<>();
+
+        tags=new HashMap<>();
+        for (Member m:discordServer.getMembers().values()) {
+            tags.put(m,0);
+        }
     }
 
     @Override
@@ -142,6 +149,7 @@ public class TextChannel extends Channel {
             c.end(user);
         }
         observers.removeIf(c -> c.getMember().getUser().equals(user));
+        tags.replace(discordServer.getMembers().get(user), 0);
     }
 
     public HashMap<Massage, File> getFiles() {
@@ -161,4 +169,9 @@ public class TextChannel extends Channel {
             return null;
         }
     }
+
+    public HashMap<Member, Integer> getTags() {
+        return tags;
+    }
+
 }

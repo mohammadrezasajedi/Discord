@@ -1,5 +1,6 @@
 package com.discord.server.utils;
 
+import com.discord.server.UserThread;
 import com.discord.server.utils.discordServer.DiscordServer;
 
 import java.awt.*;
@@ -44,7 +45,7 @@ public class User implements Serializable {
             return str;
         }
     }
-
+    private transient UserThread userThread;
     private String userName;
     private String password;
     private String email;
@@ -187,4 +188,13 @@ public class User implements Serializable {
                 "userName='" + userName + '\'' +
                 '}';
     }
+
+    public UserThread getUserThread() {
+        return userThread;
+    }
+
+    public void setUserThread(UserThread userThread) {
+        this.userThread = userThread;
+    }
+
 }

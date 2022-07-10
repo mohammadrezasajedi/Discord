@@ -3,10 +3,10 @@ package com.discord.server.utils;
 import java.io.*;
 import java.net.Socket;
 
-public class FileStream {
-    private Socket socket;
-    private DataOutputStream out;
-    private DataInputStream in;
+public class FileStream implements Serializable{
+    private transient Socket socket;
+    private transient DataOutputStream out;
+    private transient DataInputStream in;
 
     public FileStream(Socket socket) throws IOException {
         this.socket = socket;

@@ -9,6 +9,7 @@ import com.discord.server.utils.discordServer.channels.TextChannel;
 import com.discord.server.utils.exceptions.WrongFormatException;
 
 import java.io.*;
+import java.util.ArrayList;
 
 public class ChannelChatIO implements Runnable, Serializable {
     private transient BufferedWriter writer;
@@ -79,6 +80,19 @@ public class ChannelChatIO implements Runnable, Serializable {
                             }
                         });
                         t.start();
+                    }else if (str.contains("@")){
+                        String userName=str.substring(str.indexOf("@")+1,(str.indexOf(" ",str.indexOf("@"))==-1) ? str.length() : str.indexOf(" ",str.indexOf("@")));
+                        ArrayList<Member> members=new ArrayList<>(textChannel.getTags().keySet());
+                        for (Member m:members) {
+                            if (m.getUser().getUserName().equals(userName)){
+                                textChannel.getTags().replace(m,textChannel.getTags().get(m)+1);
+                                if (m.getUser().getUserThread()!=null){
+                                    m.getUser().getUserThread().sendPopUp("You Were Tagged",member.getUser().getUserName()+" tagged you in "+textChannel.getName());
+                                }
+                                break;
+                            }
+                        }
+                        textChannel.sendMassage(new Massage(str,member.getUser(),textChannel.getId()));
                     }
                     else {
                         textChannel.sendMassage(new Massage(str,member.getUser(),textChannel.getId()));

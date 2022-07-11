@@ -5,6 +5,7 @@ import com.discord.server.utils.FileStream;
 import com.discord.server.utils.Massage;
 import com.discord.server.utils.User;
 import com.discord.server.utils.chat.channel.ChannelChatIO;
+import com.discord.server.utils.chat.privateChat.PrivateChatWriter;
 import com.discord.server.utils.discordServer.DiscordServer;
 import com.discord.server.utils.discordServer.Member;
 import com.discord.server.utils.exceptions.WrongFormatException;
@@ -72,13 +73,29 @@ public class TextChannel extends Channel {
         t.start();
     }
 
+    public void sendIsTyping (User user) {
+        Thread t = new Thread(() -> isTyping(user.getUserName() + " is Typing...",user));
+        t.start();
+    }
+
+    private void isTyping(String str,User user){
+        for (ChannelChatIO w: observers) {
+            w.broadcast("$$" + str,user);
+        }
+    }
+
     public void like (Long id,User user) throws WrongFormatException {
         Massage massage = massages.get(id);
         if (massage == null){
             throw new WrongFormatException("Message Doesn't Exist");
         } else {
             massage.addLike(user);
-            Thread t = new Thread(() -> publicMessage(user.getUserName() + " liked " + massage.getAuthor().getUserName()));
+            Thread t = new Thread(() -> {
+                publicMessage(user.getUserName() + " liked " + massage.getAuthor().getUserName());
+                for (ChannelChatIO p : observers) {
+                    p.broadcast("##" + "like" + "-" + id + "-" + user.getUserName());
+                }
+            });
             t.start();
         }
     }
@@ -88,7 +105,12 @@ public class TextChannel extends Channel {
             throw new WrongFormatException("Message Doesn't Exist");
         }else {
             massage.addDislike(user);
-            Thread t = new Thread(() -> publicMessage(user.getUserName() + " disliked " + massage.getAuthor().getUserName()));
+            Thread t = new Thread(() -> {
+                publicMessage(user.getUserName() + " disliked " + massage.getAuthor().getUserName());
+                for (ChannelChatIO p : observers) {
+                    p.broadcast("##" + "dislike" + "-" + id + "-" + user.getUserName());
+                }
+            });
             t.start();
         }
     }
@@ -98,7 +120,12 @@ public class TextChannel extends Channel {
             throw new WrongFormatException("Message Doesn't Exist");
         }else {
             massage.addLaughter(user);
-            Thread t = new Thread(() -> publicMessage(user.getUserName() + " laughed at " + massage.getAuthor().getUserName()));
+            Thread t = new Thread(() -> {
+                publicMessage(user.getUserName() + " laughed at " + massage.getAuthor().getUserName());
+                for (ChannelChatIO p : observers) {
+                    p.broadcast("##" + "laugh" + "-" + id + "-" + user.getUserName());
+                }
+            });
             t.start();
         }
     }
@@ -134,13 +161,13 @@ public class TextChannel extends Channel {
 
     private void publicMessage (String str){
         for (ChannelChatIO c : observers) {
-            c.broadcast(str);
+            c.broadcast("|" + str);
         }
     }
 
     private void update(Massage massage) {
         for (ChannelChatIO c : observers) {
-            c.broadcast(massage);
+            c.Initbroadcast(massage);
         }
     }
 
@@ -174,4 +201,7 @@ public class TextChannel extends Channel {
         return tags;
     }
 
+    public ArrayList<ChannelChatIO> getObservers() {
+        return observers;
+    }
 }

@@ -1,12 +1,17 @@
 package com.discord.server.utils;
 
 import com.discord.Command;
+import com.discord.server.utils.chat.channel.ChannelChatIO;
 import com.discord.server.utils.chat.privateChat.PrivateChatReader;
 import com.discord.server.utils.chat.privateChat.PrivateChatWriter;
+import com.discord.server.utils.discordServer.DiscordServer;
+import com.discord.server.utils.exceptions.WrongFormatException;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class PrivateChat implements Serializable {
     private User user1;
@@ -15,10 +20,16 @@ public class PrivateChat implements Serializable {
     private HashMap<Massage, File> files;
     private transient ArrayList<PrivateChatWriter> observers;
     private  long keepId;
+    private Massage pinnedMessage;
 
     public void sendMassage(Massage massage){
         massages.put(massage.getId(),massage);
         Thread t = new Thread(() -> update(massage));
+        t.start();
+    }
+
+    public void sendIsTyping (User user) {
+        Thread t = new Thread(() -> isTyping(user.getUserName() + " is Typing...",user));
         t.start();
     }
 
@@ -77,7 +88,7 @@ public class PrivateChat implements Serializable {
         } catch (IOException e) {
             Thread.currentThread().interrupt();
         }
-        PrivateChatWriter privateChatWriter = new PrivateChatWriter(writer,user);
+        PrivateChatWriter privateChatWriter = new PrivateChatWriter(writer,user,this);
         addObserver(privateChatWriter);
         for (Long l: massages.keySet()) {
             privateChatWriter.Initbroadcast(massages.get(l));
@@ -99,7 +110,82 @@ public class PrivateChat implements Serializable {
 
     private void update(Massage massage) {
         for (PrivateChatWriter w: observers) {
-            w.broadcast(massage);
+            w.Initbroadcast(massage);
+        }
+    }
+
+    private void isTyping(String str,User user){
+        for (PrivateChatWriter w: observers) {
+            w.broadcast("$$" + str,user);
+        }
+    }
+
+    public void like (Long id,User user) throws WrongFormatException {
+        Massage massage = massages.get(id);
+        if (massage == null){
+            throw new WrongFormatException("Message Doesn't Exist");
+        } else {
+            massage.addLike(user);
+            Thread t = new Thread(() -> {
+                publicMessage(user.getUserName() + " liked " + massage.getAuthor().getUserName());
+                for (PrivateChatWriter p : observers) {
+                    p.broadcast("##" + "like" + "-" + id + "-" + user.getUserName());
+                }
+            });
+            t.start();
+        }
+    }
+    public void dislike(Long id,User user) throws WrongFormatException {
+        Massage massage=massages.get(id);
+        if (massage==null) {
+            throw new WrongFormatException("Message Doesn't Exist");
+        }else {
+            massage.addDislike(user);
+            Thread t = new Thread(() -> {
+                publicMessage(user.getUserName() + " disliked " + massage.getAuthor().getUserName());
+                for (PrivateChatWriter p : observers) {
+                    p.broadcast("##" + "dislike" + "-" + id + "-" + user.getUserName());
+                }
+            });
+            t.start();
+        }
+    }
+    public void laughter(Long id,User user) throws WrongFormatException {
+        Massage massage=massages.get(id);
+        if (massage==null) {
+            throw new WrongFormatException("Message Doesn't Exist");
+        }else {
+            massage.addLaughter(user);
+            Thread t = new Thread(() -> {
+                publicMessage(user.getUserName() + " laughed at " + massage.getAuthor().getUserName());
+                for (PrivateChatWriter p : observers) {
+                    p.broadcast("##" + "laugh" + "-" + id + "-" + user.getUserName());
+                }
+            });
+            t.start();
+        }
+    }
+
+    public void pin(Long id,User user) throws WrongFormatException {
+        Massage massage=massages.get(id);
+        if (massage==null) {
+            throw new WrongFormatException("Message Doesn't Exist");
+        }else {
+            pinnedMessage = massage;
+            Thread t = new Thread(() -> publicMessage(user.getUserName() + " pinned " + massage.getId()));
+            t.start();
+        }
+    }
+
+    public void publicMessage (String str){
+        for (PrivateChatWriter p : observers){
+            p.broadcast("|" + str);
+        }
+    }
+
+    public void getPinned (PrivateChatWriter writer) {
+        if (pinnedMessage != null){
+            writer.Initbroadcast(pinnedMessage);
         }
     }
 
@@ -121,4 +207,7 @@ public class PrivateChat implements Serializable {
         }
     }
 
+    public ArrayList<PrivateChatWriter> getObservers() {
+        return observers;
+    }
 }

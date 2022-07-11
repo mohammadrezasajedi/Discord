@@ -58,6 +58,7 @@ public class User implements Serializable {
     private HashMap<String,PrivateChat> privateChats;
     private ArrayList<User> blockUsers;
     private ArrayList<DiscordServer> discordServers;
+    private ArrayList<DiscordServer> invitations;
     public User(String userName, String password, String email, String phoneNumber,File imageFile){
         this.userName = userName;
         this.password = password;
@@ -70,6 +71,7 @@ public class User implements Serializable {
         discordServers=new ArrayList<>();
         sendedReqs = new HashMap<>();
         blockUsers = new ArrayList<>();
+        invitations = new ArrayList<>();
         status = Status.ONLINE;
     }
 
@@ -184,9 +186,7 @@ public class User implements Serializable {
 
     @Override
     public String toString() {
-        return "User{" +
-                "userName='" + userName + '\'' +
-                '}';
+        return userName;
     }
 
     public UserThread getUserThread() {
@@ -197,4 +197,7 @@ public class User implements Serializable {
         this.userThread = userThread;
     }
 
+    public ArrayList<DiscordServer> getInvitations() {
+        return invitations;
+    }
 }

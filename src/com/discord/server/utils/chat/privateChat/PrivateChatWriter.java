@@ -12,22 +12,36 @@ import java.io.Serializable;
 public class PrivateChatWriter implements Serializable {
     private transient BufferedWriter writer;
     private User user;
+    private PrivateChat pchat;
 
 
-    public PrivateChatWriter(BufferedWriter writer, User user) {
+    public PrivateChatWriter(BufferedWriter writer, User user,PrivateChat pchat) {
         this.writer = writer;
         this.user = user;
+        this.pchat = pchat;
     }
 
     public User getUser() {
         return user;
     }
 
-    public void broadcast (Massage massage) {
+    public void broadcast (String str,User user) {
         try {
-            methodWrite(massage.toString());
+            if (!this.user.equals(user)){
+                methodWrite(str);
+            }
         } catch (IOException e){
             System.err.println("Couldn't Send Message");
+            pchat.getObservers().remove(this);
+        }
+    }
+
+    public void broadcast (String str) {
+        try {
+            methodWrite(str);
+        } catch (IOException e){
+            System.err.println("Couldn't Send Message");
+            pchat.getObservers().remove(this);
         }
     }
 
@@ -36,6 +50,7 @@ public class PrivateChatWriter implements Serializable {
             methodWrite(massage.toString());
         } catch (IOException e){
             System.err.println("Couldn't Send Message");
+            pchat.getObservers().remove(this);
         }
     }
 
@@ -46,6 +61,7 @@ public class PrivateChatWriter implements Serializable {
             }
         } catch (IOException e){
             System.err.println("Couldn't Send Message");
+            pchat.getObservers().remove(this);
         }
     }
 

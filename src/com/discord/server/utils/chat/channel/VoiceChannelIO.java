@@ -93,7 +93,9 @@ public class VoiceChannelIO implements Runnable, Serializable {
 
     public void broadcast (Massage massage) {
         try {
-            methodWrite(massage.toString());
+            if (!massage.getAuthor().equals(member.getUser())) {
+                methodWrite(massage.toString());
+            }
         } catch (IOException e){
             System.err.println("Couldn't Send Message");
         }

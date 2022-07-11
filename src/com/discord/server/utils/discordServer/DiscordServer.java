@@ -4,6 +4,7 @@ import com.discord.server.ControllCenter;
 import com.discord.server.utils.FileStream;
 import com.discord.server.utils.User;
 import com.discord.server.utils.discordServer.channels.Channel;
+import com.discord.server.utils.discordServer.channels.TextChannel;
 import com.discord.server.utils.exceptions.DuplicateException;
 
 import java.awt.desktop.PreferencesEvent;
@@ -179,14 +180,29 @@ public class DiscordServer implements Serializable {
         controllCenter.removeServer(this);
     }
 
-    public boolean addUser (String userName){
+    public boolean inviteUser (String userName){
         User user = controllCenter.findUser(userName);
+        if (user != null){
+            user.getInvitations().add(this);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean addUser (User user){
         if (user != null){
             Member member = new Member(user,this);
             member.getRoles().add("User");
             userRoles.put(user,member.getRoles());
             members.put(user,member);
             user.getDiscordServers().add(this);
+
+            for (Channel c : channels.values()){
+                if (c instanceof TextChannel){
+                    ((TextChannel) c).getTags().put(member,0);
+                }
+            }
             return true;
         } else {
             return false;

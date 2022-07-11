@@ -93,6 +93,8 @@ public class ChannelChatIO implements Runnable, Serializable {
                             }
                         }
                         textChannel.sendMassage(new Massage(str,member.getUser(),textChannel.getId()));
+                    } else if (str.equals("$")){
+                        textChannel.sendIsTyping(member.getUser());
                     }
                     else {
                         textChannel.sendMassage(new Massage(str,member.getUser(),textChannel.getId()));
@@ -108,11 +110,25 @@ public class ChannelChatIO implements Runnable, Serializable {
         }
     }
 
-    public void broadcast (Massage massage) {
+    public void broadcast (String str,User user) {
         try {
-            methodWrite(massage.toString());
+            if (!member.getUser().equals(user)){
+                methodWrite(str);
+            }
         } catch (IOException e){
             System.err.println("Couldn't Send Message");
+            textChannel.getObservers().remove(this);
+        }
+    }
+
+    public void broadcast (Massage massage) {
+        try {
+            if (!massage.getAuthor().equals(member.getUser())) {
+                methodWrite(massage.toString());
+            }
+        } catch (IOException e){
+            System.err.println("Couldn't Send Message");
+            textChannel.getObservers().remove(this);
         }
     }
 
@@ -121,6 +137,7 @@ public class ChannelChatIO implements Runnable, Serializable {
             methodWrite(str);
         } catch (IOException e){
             System.err.println("Couldn't Send Message");
+            textChannel.getObservers().remove(this);
         }
     }
 
@@ -129,6 +146,7 @@ public class ChannelChatIO implements Runnable, Serializable {
             methodWrite(massage.toString());
         } catch (IOException e){
             System.err.println("Couldn't Send Message");
+            textChannel.getObservers().remove(this);
         }
     }
 
@@ -139,6 +157,7 @@ public class ChannelChatIO implements Runnable, Serializable {
             }
         } catch (IOException e){
             System.err.println("Couldn't Send Message");
+            textChannel.getObservers().remove(this);
         }
     }
 

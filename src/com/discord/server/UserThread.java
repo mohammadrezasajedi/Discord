@@ -13,6 +13,7 @@ import java.awt.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -104,7 +105,7 @@ public class UserThread extends Thread{
                 user.setUserThread(null);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            System.out.println("Connection Reset");
         }
     }
 
@@ -180,25 +181,40 @@ public class UserThread extends Thread{
     }
 
     private void createNewFriend() throws IOException {
+        boolean loop = true;
         methodWrite(Command.CREATEFRIEND.getStr());
-        String userName=methodRead();
-        User user=controllCenter.findUser(userName);
-        String str;
-        if (user==null){
-            str="User is not found.";
-        }else {
-            if (user.getRequests().contains(this.user)){
-                str = "You already have a pending request";
-            } else if (user.equals(this.user) || this.user.getFriends().contains(user)){
-                str = "You can't send user request to this user";
-            }
-            else {
-                this.user.sendRequest(user);
-                user.addRequest(this.user);
-                str="Your Friend Request has been sent.";
+        while (loop) {
+            try {
+                String userName = methodRead();
+                if (!userName.equals("exit")) {
+                    if (controllCenter.checkUserNameFormat(userName)) {
+                        User user = controllCenter.findUser(userName);
+                        if (user == null) {
+                            notificationStream.sendPopUp("Friend Request Failed", "Hm,didn't work, Double check that capitalization,Spelling and etc. are correct.");
+                            methodWrite(Command.GETUSERNAMEAGAIN.getStr());
+                            methodWrite("didn't work, Double check it.");
+                        } else {
+                            String str;
+                            if (user.getRequests().contains(this.user)) {
+                                str = "You already have a pending request";
+                            } else if (user.equals(this.user) || this.user.getFriends().contains(user)) {
+                                str = "You can't send user request to this user";
+                            } else {
+                                this.user.sendRequest(user);
+                                user.addRequest(this.user);
+                                str = "Your Friend Request has been sent.";
+                            }
+                            notificationStream.sendPopUp("Friend Request Status", str);
+                        }
+                    }
+                } else {
+                    loop = false;
+                }
+            } catch (WrongFormatException e) {
+                methodWrite(Command.GETUSERNAMEAGAIN.getStr());
+                methodWrite("User Name format is not valid");
             }
         }
-        notificationStream.sendPopUp("Friend Request Status",str);
     }
 
     private void showFriends() throws IOException {
@@ -550,9 +566,9 @@ public class UserThread extends Thread{
         ArrayList<DiscordServer> se =user.getDiscordServers();
 
         while (loop) {
-            int num = 2 + se.size();
-            StringBuilder sb = new StringBuilder("1.exit\n2.create new chat\n");
-            int i = 3;
+            int num = 3 + se.size();
+            StringBuilder sb = new StringBuilder("1.exit\n2.create new chat\n3.Invites\n");
+            int i = 4;
             for (DiscordServer s : se) {
                 sb.append(i++);
                 sb.append('.');
@@ -570,10 +586,40 @@ public class UserThread extends Thread{
                     creatNewServer();
                     break;
                 }
-                default:{
-                    server(se.get(choose-3));
+                case 3 : {
+                    invites();
                     break;
                 }
+                default:{
+                    server(se.get(choose-4));
+                    break;
+                }
+            }
+        }
+    }
+
+    private void invites () throws IOException {
+        boolean loop=true;
+        while (loop){
+            StringBuilder sb=new StringBuilder();
+            sb.append("1.exit\n");
+            int index=2;
+            for (DiscordServer d:user.getInvitations()) {
+                sb.append(index++);
+                sb.append('.');
+                sb.append(d.getServerName());
+                sb.append("\n");
+            }
+            int choose = showMenu(sb.toString(),index - 1);
+            if (choose==1){
+                loop=false;
+            }else {
+                DiscordServer d = user.getInvitations().get(choose - 2);
+                int choice=showMenu("1.YES\n2.NO",2);
+                if (choice==1){
+                    d.addUser(user);
+                }
+                user.getInvitations().remove(d);
             }
         }
     }
@@ -586,8 +632,12 @@ public class UserThread extends Thread{
         while (loop) {
             try {
                 serverName = methodRead();
-                if (controllCenter.checkServerName(serverName)){
-                    loop=false;
+                if (!serverName.equals("exit")) {
+                    if (controllCenter.checkServerName(serverName)) {
+                        loop = false;
+                    }
+                } else {
+                    loop = false;
                 }
             }catch (DuplicateException e){
                 loop = true;
@@ -671,7 +721,11 @@ public class UserThread extends Thread{
                     while (l) {
                         try {
                             userName = reader.readLine();
-                            l = !controllCenter.checkUserName(userName);
+                            if (!userName.equals("exit")) {
+                                l = !controllCenter.checkUserName(userName);
+                            } else {
+                                l = false;
+                            }
                         } catch (DuplicateException | WrongFormatException e) {
                             methodWrite(Command.GETUSERNAMEAGAIN.getStr());
                             methodWrite(e.toString());
@@ -701,7 +755,11 @@ public class UserThread extends Thread{
                     while (l) {
                         try {
                             password = reader.readLine();
-                            l = !controllCenter.checkPassword(password);
+                            if (!password.equals("exit")) {
+                                l = !controllCenter.checkPassword(password);
+                            } else {
+                                l = false;
+                            }
                         } catch (WrongFormatException e) {
                             methodWrite(Command.GETPASSWORDAGAIN.getStr());
                             methodWrite(e.toString());
@@ -734,7 +792,11 @@ public class UserThread extends Thread{
                     while (l) {
                         try {
                             email = reader.readLine();
-                            l = !controllCenter.checkEmail(email);
+                            if (!email.equals("exit")) {
+                                l = !controllCenter.checkEmail(email);
+                            } else {
+                                l = false;
+                            }
                         } catch (WrongFormatException e) {
                             methodWrite(Command.GETEMAILAGAIN.getStr());
                             methodWrite(e.toString());
@@ -767,7 +829,11 @@ public class UserThread extends Thread{
                     while (l) {
                         try {
                             phone = reader.readLine();
-                            l = !controllCenter.checkPhone(phone);
+                            if (!phone.equals("exit")) {
+                                l = !controllCenter.checkPhone(phone);
+                            } else {
+                                l = false;
+                            }
                         } catch (WrongFormatException e) {
                             methodWrite(Command.GETPHONEAGAIN.getStr());
                             methodWrite(e.toString());

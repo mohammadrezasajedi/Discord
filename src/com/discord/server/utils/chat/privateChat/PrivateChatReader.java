@@ -62,12 +62,32 @@ public class PrivateChatReader implements Runnable, Serializable {
                         });
                         t.start();
                     } else if (str.contains("#")) {
-                        str = methodRead();
-                        continue;
-                    } else {
+                        if (str.contains("#like")) {
+                            String[] strings = str.split("-");
+                            long id = Long.parseLong(strings[1]);
+                            privateChat.like(id,user);
+                        } else if (str.contains("#dislike")){
+                            String[] strings = str.split("-");
+                            long id = Long.parseLong(strings[1]);
+                            privateChat.dislike(id,user);
+                        }else if (str.contains("#laughter")){
+                            String[] strings = str.split("-");
+                            long id = Long.parseLong(strings[1]);
+                            privateChat.laughter(id,user);
+                        }else if (str.contains("#pin")){
+                            String[] strings = str.split("-");
+                            long id = Long.parseLong(strings[1]);
+                            privateChat.pin(id,user);
+                        } else if (str.contains("#getpm")){
+                            privateChat.getPinned(writer);
+                        }
+                    } else if (str.equals("$")){
+                        privateChat.sendIsTyping(user);
+                    }
+                    else {
                         privateChat.sendMassage(new Massage(str, user, privateChat.getId()));
                     }
-                } catch (NumberFormatException | ArrayIndexOutOfBoundsException e){
+                } catch (NumberFormatException | ArrayIndexOutOfBoundsException | WrongFormatException e){
                     System.err.println(user.getUserName() + " sent an unacceptable command");
                 }
                 str = methodRead();

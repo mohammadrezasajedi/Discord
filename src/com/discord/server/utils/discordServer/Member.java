@@ -2,6 +2,7 @@ package com.discord.server.utils.discordServer;
 
 import com.discord.Command;
 import com.discord.server.utils.FileStream;
+import com.discord.server.utils.Massage;
 import com.discord.server.utils.User;
 import com.discord.server.utils.discordServer.channels.Channel;
 import com.discord.server.utils.discordServer.channels.TextChannel;
@@ -70,6 +71,12 @@ public class Member implements Serializable {
                 Thread.sleep(5 * 1000);
             } catch (InterruptedException e){
                 e.printStackTrace();
+            }
+
+            for (Channel t : discordServer.getChannels(this).values()){
+                if (t instanceof TextChannel){
+                    ((TextChannel) t).sendMassage(new Massage("Say WellCome To " + user.getUserName(),user,t.getId()));
+                }
             }
         }
         boolean loop=true;
@@ -219,18 +226,33 @@ public class Member implements Serializable {
     }
 
     private void userAdder () throws IOException {
-        boolean loop = true;
-        methodWrite(Command.GETUSERNAME.getStr());
-        String userName = null;
-        while (loop) {
-            userName = methodRead();
-            if (discordServer.addUser(userName)){
-                loop = false;
-            } else {
-                loop = true;
-                methodWrite(Command.GETUSERNAMEAGAIN.getStr());
-                methodWrite("couldn't add user");
+        methodWrite(Command.GETTABLE.getStr());
+        methodWrite(String.valueOf(user.getFriends().size()));
+        methodWrite("inv");
+        for (User u:user.getFriends()) {
+            String status = "Invite";
+            if (u.getInvitations().contains(discordServer)){
+                status = "Sent";
+            } else if (u.getDiscordServers().contains(discordServer)) {
+                status = "Member";
             }
+            methodWrite(u.getUserName() + " : " + status);
+            if (u.getImageFile() != null){
+                methodWrite("pic");
+                fileStream.methodWrite(u.getImageFile().getName());
+                fileStream.sendFile(u.getImageFile());
+            } else {
+                methodWrite("null");
+            }
+        }
+        String str = methodRead();
+        while (!str.equals("exit")){
+            if (discordServer.inviteUser(str)){
+                user.getUserThread().sendPopUp("Server Invitation Status","Successfully invited " + str);
+            } else {
+                user.getUserThread().sendPopUp("Server Invitation Status","Couldn't invite " + str);
+            }
+            str = methodRead();
         }
     }
 
@@ -241,8 +263,12 @@ public class Member implements Serializable {
         while (loop) {
             try {
                 serverName = methodRead();
-                if (discordServer.changeServerName(serverName)){
-                    loop=false;
+                if (!serverName.equals("exit")) {
+                    if (discordServer.changeServerName(serverName)) {
+                        loop = false;
+                    }
+                } else {
+                    loop = false;
                 }
             }catch (DuplicateException e){
                 loop = true;
@@ -258,10 +284,14 @@ public class Member implements Serializable {
         while (loop){
             try {
                 roleName = methodRead();
-                if (!discordServer.checkRoleName(roleName)) {
-                    throw new DuplicateException("This role name already exists");
+                if (!roleName.equals("exit")) {
+                    if (!discordServer.checkRoleName(roleName)) {
+                        throw new DuplicateException("This role name already exists");
+                    }
+                    loop = false;
+                } else {
+                    loop = false;
                 }
-                loop = false;
             } catch (DuplicateException e){
                 loop = true;
                 methodWrite(Command.GETUSERNAMEAGAIN.getStr());
@@ -414,8 +444,8 @@ public class Member implements Serializable {
         boolean loop =true;
         boolean exit=true;
         Member member = null;
-        ArrayList<Member> members = new ArrayList<>(discordServer.getMembers().values());
         while (loop){
+            ArrayList<Member> members = new ArrayList<>(discordServer.getMembers().values());
             StringBuilder sb= new StringBuilder("1.exit\n");
             int num=1+members.size();
             int i = 2;
@@ -438,8 +468,6 @@ public class Member implements Serializable {
             }
 
             while (exit){
-//                methodWrite(Command.PRINT.getStr());
-//                methodWrite("Are you sure?");
                 sb = new StringBuilder("1.YES\n2.NO\n");
                 choose = showMenu(sb.toString(),2);
 
@@ -449,6 +477,7 @@ public class Member implements Serializable {
                         discordServer.getBlockedMembers().remove(member);
                         discordServer.getMembers().remove(member.user);
                         discordServer.getUserRoles().remove(member.user);
+                        exit =false;
                         break;
                     }
                     case 2:{
@@ -467,10 +496,14 @@ public class Member implements Serializable {
         while (loop) {
             try {
                 name = methodRead();
-                if (!discordServer.checkChannelName(name)) {
-                    throw new DuplicateException("This Channel Name is in use.");
+                if (!name.equals("exit")) {
+                    if (!discordServer.checkChannelName(name)) {
+                        throw new DuplicateException("This Channel Name is in use.");
+                    }
+                    loop = false;
+                } else {
+                    loop = false;
                 }
-                loop = false;
 
             } catch (DuplicateException e) {
                 loop = true;

@@ -93,6 +93,14 @@ public class ControllCenter implements Serializable {
         }
     }
 
+    public boolean checkUserNameFormat(String str) throws WrongFormatException {
+        if (Pattern.matches("(\\S[a-zA-z0-9]{5,})",str)){
+            return true;
+        } else {
+            throw new WrongFormatException("Your user name is not valid");
+        }
+    }
+
     public boolean checkPassword(String str) throws WrongFormatException {
         if (Pattern.matches("\\w{7,}",str)) {
             return true;
